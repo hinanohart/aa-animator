@@ -11,19 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Main pipeline: image → AA animation frames → MP4.
+"""High-level :class:`AAAnimator` orchestrator.
 
-Day 1 scope: load_image, segment_subject (rembg), render_frames, export_mp4.
-Day 2 scope: estimate_depth (DA-V2 Small), forward-warp parallax, pixel hole fill,
-             temporal EMA smoothing, fg-only histogram stretch, ghostty_fill bg-dot,
-             preview / bake CLI commands.
-Day 3 scope: Bayer dither mode, ffmpeg optimisation flags, DRY _prepare_run helper.
+Responsibilities are delegated to sibling modules:
+
+* :mod:`._segmentation` — rembg / Otsu foreground masking
+* :mod:`._depth`        — Depth Anything V2 Small inference + cache
+* :mod:`._rendering`    — cell-level brightness stretch and hole fill
+* :mod:`._encoding`     — ffmpeg MP4 subprocess
 """
 
 from __future__ import annotations
 
-import hashlib
-import subprocess
 import sys
 from pathlib import Path
 from typing import Literal
@@ -32,28 +31,22 @@ import numpy as np
 from PIL import Image
 from scipy.ndimage import sobel as scipy_sobel  # type: ignore[import-untyped]
 
-from aa_animator_v2.parallax import dynamic_amp_px, fill_holes, forward_warp, orbit_displacement, warp_mask
-from aa_animator_v2.renderer import EDGE_THRESH, NCHARS, DitherMode, FrameRenderer, RenderMode
+from aa_animator_v2.parallax import (
+    dynamic_amp_px,
+    fill_holes,
+    forward_warp,
+    orbit_displacement,
+    warp_mask,
+)
+from aa_animator_v2.renderer import EDGE_THRESH, DitherMode, FrameRenderer, RenderMode
 from aa_animator_v2.smoothing import TemporalSmoother
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-
-# Canonical model ID for the Apache-2.0 Depth Anything V2 Small checkpoint.
-# Defined once here to prevent drift between code and docs/legal-notes.md.
-_DA_V2_MODEL_ID = "depth-anything/Depth-Anything-V2-Small-hf"
-
-# ---------------------------------------------------------------------------
-# Types
-# ---------------------------------------------------------------------------
+from ._depth import estimate_depth as _estimate_depth_impl
+from ._encoding import export_mp4 as _export_mp4_impl
+from ._rendering import fill_cell_holes, stretch_fg_brightness
+from ._segmentation import segment_subject as _segment_subject_impl
 
 BgMode = Literal["black", "ghostty_fill"]
-
-
-# ---------------------------------------------------------------------------
-# AAAnimator
-# ---------------------------------------------------------------------------
 
 
 class AAAnimator:
@@ -105,7 +98,7 @@ class AAAnimator:
         # State set by load_image / segment_subject
         self._img_np: np.ndarray | None = None      # (H, W, 3) float32 [0-1]
         self._fg_mask: np.ndarray | None = None     # (H, W) bool
-        self._depth: np.ndarray | None = None       # (H, W) float32 [0-1]  — stub
+        self._depth: np.ndarray | None = None       # (H, W) float32 [0-1]
 
         self._renderer: FrameRenderer | None = None
         self._smoother: TemporalSmoother = TemporalSmoother(alpha=0.3)
@@ -162,64 +155,15 @@ class AAAnimator:
         Returns:
             Boolean mask array of shape (H, W).
         """
-        try:
-            from rembg import remove as rembg_remove  # type: ignore[import-not-found]
-        except ImportError:
-            return self._otsu_fg_mask(image)
-
-        try:
-            rgba = rembg_remove(image)
-            alpha = np.array(rgba, dtype=np.float32)[:, :, 3]
-            thresh = self._otsu_threshold(alpha.astype(np.uint8))
-            mask = alpha > thresh
-            if mask.mean() < 0.05:  # coverage too low → fallback
-                return self._otsu_fg_mask(image)
-            return mask
-        except Exception:
-            return self._otsu_fg_mask(image)
-
-    def _otsu_fg_mask(self, image: Image.Image) -> np.ndarray:
-        gray = np.array(image.convert("L"), dtype=np.float32)
-        thresh = self._otsu_threshold(gray.astype(np.uint8))
-        return gray > thresh
-
-    @staticmethod
-    def _otsu_threshold(gray_u8: np.ndarray) -> float:
-        hist, _ = np.histogram(gray_u8.flatten(), bins=256, range=(0, 256))
-        total = gray_u8.size
-        sum_total = float(np.dot(np.arange(256), hist))
-        sum_bg = 0.0
-        weight_bg = 0
-        best_thresh = 128.0
-        best_var = 0.0
-        for t in range(256):
-            weight_bg += hist[t]
-            if weight_bg == 0:
-                continue
-            weight_fg = total - weight_bg
-            if weight_fg == 0:
-                break
-            sum_bg += t * hist[t]
-            mean_bg = sum_bg / weight_bg
-            mean_fg = (sum_total - sum_bg) / weight_fg
-            var = weight_bg * weight_fg * (mean_bg - mean_fg) ** 2
-            if var > best_var:
-                best_var = var
-                best_thresh = float(t)
-        return best_thresh
+        return _segment_subject_impl(image)
 
     # ------------------------------------------------------------------- depth
 
     def estimate_depth(self, image: Image.Image) -> np.ndarray:
         """Estimate depth map using Depth Anything V2 Small (Apache-2.0).
 
-        Model is loaded via ``transformers.pipeline`` and result is cached
-        in ``~/.cache/aa_animator/depth/<input_hash>.npy`` to avoid repeated
-        inference for the same image.
-
-        Falls back to a uniform 0.5 map if transformers or the model are
-        unavailable so the pipeline stays functional without the optional
-        depth dependency.
+        See :func:`aa_animator_v2.pipeline._depth.estimate_depth` for
+        caching and fallback behaviour.
 
         Args:
             image: PIL RGB image at renderer resolution.
@@ -230,43 +174,7 @@ class AAAnimator:
         """
         h = self._img_h or image.height
         w = self._img_w or image.width
-        target_size = (w, h)
-
-        # Cache key from image bytes
-        img_bytes = np.array(image, dtype=np.uint8).tobytes()
-        cache_key = hashlib.md5(img_bytes, usedforsecurity=False).hexdigest()  # noqa: S324
-        cache_dir = Path.home() / ".cache" / "aa_animator" / "depth"
-        cache_path = cache_dir / f"{cache_key}.npy"
-
-        if cache_path.exists():
-            depth_raw = np.load(str(cache_path))
-            return _normalize_depth(depth_raw, target_size)
-
-        try:
-            import torch  # type: ignore[import-not-found]
-            from transformers import pipeline as hf_pipeline  # type: ignore[import-not-found]
-
-            if torch.cuda.is_available():
-                device = "cuda"
-            else:
-                device = "cpu"
-
-            depth_pipe = hf_pipeline(
-                task="depth-estimation",
-                model=_DA_V2_MODEL_ID,
-                device=device,
-            )
-            result = depth_pipe(image)
-            depth_pil: Image.Image = result["depth"]
-            depth_raw = np.array(depth_pil, dtype=np.float32)
-
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            np.save(str(cache_path), depth_raw)
-            return _normalize_depth(depth_raw, target_size)
-
-        except Exception:
-            # Graceful fallback: uniform mid-depth keeps the pipeline running
-            return np.full((h, w), 0.5, dtype=np.float32)
+        return _estimate_depth_impl(image, target_size=(w, h))
 
     # ------------------------------------------------------------------ frames
 
@@ -295,10 +203,7 @@ class AAAnimator:
             return [self._img_np.copy() for _ in range(count)]
 
         # Dynamic AMP based on fg_coverage
-        if self._fg_mask is not None:
-            fg_coverage = float(self._fg_mask.mean())
-        else:
-            fg_coverage = 0.3
+        fg_coverage = float(self._fg_mask.mean()) if self._fg_mask is not None else 0.3
         amp = dynamic_amp_px(fg_coverage)
 
         frames: list[np.ndarray] = []
@@ -336,8 +241,6 @@ class AAAnimator:
         Returns:
             List of PIL Images ready for ffmpeg encoding.
         """
-        from scipy.ndimage import uniform_filter  # type: ignore[import-untyped]
-
         if self._renderer is None:
             self._renderer = FrameRenderer(
                 mode=self.mode,
@@ -357,18 +260,11 @@ class AAAnimator:
         rendered: list[Image.Image] = []
 
         for idx, frame_np in enumerate(frames):
-            # Per-frame warped mask (from parallax warp) or static fg_mask
-            frame_mask: np.ndarray | None = None
-            if warped_masks is not None and idx < len(warped_masks):
-                frame_mask = warped_masks[idx]
-            elif self._fg_mask is not None:
-                frame_mask = self._fg_mask
+            frame_mask = self._pick_frame_mask(warped_masks, idx)
 
             # Luminance → cell brightness
             gray = 0.299 * frame_np[:, :, 0] + 0.587 * frame_np[:, :, 1] + 0.114 * frame_np[:, :, 2]
-            cell_brightness = (
-                gray.reshape(rows, cell_h, cols, cell_w).mean(axis=(1, 3))
-            )
+            cell_brightness = gray.reshape(rows, cell_h, cols, cell_w).mean(axis=(1, 3))
 
             # Foreground mask at cell level
             mask_cell: np.ndarray | None = None
@@ -379,34 +275,18 @@ class AAAnimator:
 
             # Cell-level hole fill post-process (handles residual gaps)
             if mask_cell is not None:
-                rgb_cell = (
-                    frame_np.reshape(rows, cell_h, cols, cell_w, 3).mean(axis=(1, 3))
+                cell_brightness = fill_cell_holes(
+                    cell_brightness, frame_np, mask_cell, (rows, cell_h, cols, cell_w),
                 )
-                rgb_sum = rgb_cell.sum(axis=2)
-                hole_cell = (~mask_cell) & (rgb_sum < (10.0 / 255.0 * 3))
-                if hole_cell.any():
-                    cb_nb = uniform_filter(cell_brightness, size=3, mode="nearest")
-                    cell_brightness[hole_cell] = cb_nb[hole_cell]
-                    still_hole = hole_cell & (cell_brightness < 0.001)
-                    if still_hole.any():
-                        cb_nb2 = uniform_filter(cell_brightness, size=5, mode="nearest")
-                        cell_brightness[still_hole] = cb_nb2[still_hole]
 
             # Histogram stretch — fg cells only when mask available
-            cell_brightness = self._stretch_fg_brightness(cell_brightness, mask_cell)
+            cell_brightness = stretch_fg_brightness(cell_brightness, mask_cell)
 
             # Temporal EMA smoothing
             cell_brightness = self._smoother.smooth(cell_brightness)
 
             # Sobel edge map → cell (with EMA smoothing to stabilise glow mask)
-            sx = scipy_sobel(gray, axis=1)
-            sy = scipy_sobel(gray, axis=0)
-            mag = np.hypot(sx, sy)
-            if mag.max() > 0:
-                mag /= mag.max()
-            edge_cell_raw = mag.reshape(rows, cell_h, cols, cell_w).mean(axis=(1, 3))
-            edge_cell_smoothed = self._edge_smoother.smooth(edge_cell_raw)
-            edge_cell = edge_cell_smoothed > EDGE_THRESH
+            edge_cell = self._compute_edge_cell(gray, rows, cell_h, cols, cell_w)
 
             img = self._renderer.render_frame(
                 cell_brightness=cell_brightness,
@@ -420,45 +300,33 @@ class AAAnimator:
 
     # ------------------------------------------------------------------ helpers
 
-    def _stretch_fg_brightness(
+    def _pick_frame_mask(
         self,
-        cell_brightness: np.ndarray,
-        mask_cell: np.ndarray | None,
+        warped_masks: list[np.ndarray] | None,
+        idx: int,
+    ) -> np.ndarray | None:
+        """Return per-frame warped mask or fall back to the static fg mask."""
+        if warped_masks is not None and idx < len(warped_masks):
+            return warped_masks[idx]
+        return self._fg_mask
+
+    def _compute_edge_cell(
+        self,
+        gray: np.ndarray,
+        rows: int,
+        cell_h: int,
+        cols: int,
+        cell_w: int,
     ) -> np.ndarray:
-        """Histogram-stretch brightness using foreground cells only.
-
-        When *mask_cell* is provided, percentile clipping is computed solely
-        from foreground cells so that background values do not compress the
-        useful dynamic range.
-
-        Args:
-            cell_brightness: (ROWS, COLS) float32 in [0, 1].
-            mask_cell: (ROWS, COLS) bool or None.
-
-        Returns:
-            Stretched (ROWS, COLS) float32 in [0, 1].
-        """
-        if mask_cell is not None and mask_cell.any():
-            fg_vals = cell_brightness[mask_cell]
-            if len(fg_vals) > 10:
-                p2 = float(np.percentile(fg_vals, 2))
-                p98 = float(np.percentile(fg_vals, 98))
-            else:
-                p2 = float(np.percentile(cell_brightness, 2))
-                p98 = float(np.percentile(cell_brightness, 98))
-        else:
-            p2 = float(np.percentile(cell_brightness, 2))
-            p98 = float(np.percentile(cell_brightness, 98))
-
-        if p98 > p2:
-            stretched = np.clip((cell_brightness - p2) / (p98 - p2), 0.0, 1.0)
-            # Re-apply only to mask cells; leave background intact
-            if mask_cell is not None:
-                out = cell_brightness.copy()
-                out[mask_cell] = stretched[mask_cell]
-                return out
-            return stretched
-        return cell_brightness
+        """Sobel magnitude → cell-averaged → EMA-smoothed → thresholded mask."""
+        sx = scipy_sobel(gray, axis=1)
+        sy = scipy_sobel(gray, axis=0)
+        mag = np.hypot(sx, sy)
+        if mag.max() > 0:
+            mag /= mag.max()
+        edge_cell_raw = mag.reshape(rows, cell_h, cols, cell_w).mean(axis=(1, 3))
+        edge_cell_smoothed = self._edge_smoother.smooth(edge_cell_raw)
+        return edge_cell_smoothed > EDGE_THRESH
 
     # ------------------------------------------------------------------ export
 
@@ -473,45 +341,7 @@ class AAAnimator:
             RuntimeError: If ffmpeg exits with a non-zero return code.
             FileNotFoundError: If ffmpeg is not found on PATH.
         """
-        if not frames:
-            raise ValueError("frames list is empty.")
-
-        output_path = Path(output_path)
-        canvas_w, canvas_h = frames[0].size
-
-        cmd = [
-            "ffmpeg", "-y",
-            "-f", "rawvideo",
-            "-pixel_format", "rgb24",
-            "-video_size", f"{canvas_w}x{canvas_h}",
-            "-framerate", str(self.fps),
-            "-i", "pipe:0",
-            "-c:v", "libx264",
-            "-preset", "medium",
-            "-crf", "20",
-            "-g", "15",
-            "-keyint_min", "15",
-            "-tune", "animation",
-            "-movflags", "+faststart",
-            "-pix_fmt", "yuv420p",
-            str(output_path),
-        ]
-
-        proc = subprocess.Popen(
-            cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-        )
-        assert proc.stdin is not None
-        for frame in frames:
-            proc.stdin.write(np.array(frame, dtype=np.uint8).tobytes())
-        proc.stdin.close()
-        proc.wait()
-
-        if proc.returncode != 0:
-            stderr = proc.stderr.read().decode(errors="replace")
-            raise RuntimeError(f"ffmpeg failed (rc={proc.returncode}):\n{stderr[-500:]}")
+        _export_mp4_impl(output_path, frames, fps=self.fps)
 
     # ------------------------------------------------------------------ private run helpers
 
@@ -544,10 +374,10 @@ class AAAnimator:
             fg_coverage = float(self._fg_mask.mean())
             amp = dynamic_amp_px(fg_coverage)
             count = self.n_frames
-            warped_masks = []
-            for t in range(count):
-                dx, dy = orbit_displacement(t, count, amp)
-                warped_masks.append(warp_mask(self._fg_mask, self._depth, dx, dy))
+            warped_masks = [
+                warp_mask(self._fg_mask, self._depth, *orbit_displacement(t, count, amp))
+                for t in range(count)
+            ]
 
         return img_pil, warped_masks
 
@@ -600,24 +430,4 @@ class AAAnimator:
         print(f"[aa-animator] baked {len(pil_frames)} frames to {out_dir}", file=sys.stderr)
 
 
-# ---------------------------------------------------------------------------
-# Module-level helpers
-# ---------------------------------------------------------------------------
-
-def _normalize_depth(depth_raw: np.ndarray, target_size: tuple[int, int]) -> np.ndarray:
-    """Resize and normalise a raw depth array to [0, 1].
-
-    Args:
-        depth_raw: 2-D float32 array from the depth model.
-        target_size: ``(width, height)`` target dimensions.
-
-    Returns:
-        Normalised float32 array of shape ``(height, width)``.
-    """
-    w, h = target_size
-    pil_depth = Image.fromarray(depth_raw).resize((w, h), Image.BILINEAR)
-    arr = np.array(pil_depth, dtype=np.float32)
-    dmin, dmax = arr.min(), arr.max()
-    if dmax > dmin:
-        return (arr - dmin) / (dmax - dmin)
-    return np.zeros_like(arr)
+__all__ = ["AAAnimator", "BgMode"]
