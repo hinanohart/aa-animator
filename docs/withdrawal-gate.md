@@ -7,6 +7,7 @@ continue developing aa-animator past the v0.0.1 demo phase.
 
 1. v0.0.1 mini PoC output sent to Discord (internal channel)
 2. 30-second demo GIF posted to X (Twitter) and Hacker News Show HN
+   [NOTE 2026-04-18] ユーザー決定待ち: 公開前 Day 1 skeleton 先行を許容するか (48h window 開始タイミングが未確定)
 3. **48 hours later**: apply the decision matrix below
 
 ## Decision matrix
@@ -48,3 +49,12 @@ v0.1 full infrastructure against a demand signal that does not exist.
 - Begin Day 1 of the 20-hour TDD plan (architecture.md)
 - Create GitHub milestones for v0.1.0 and v0.2.0
 - Open PyPI Trusted Publishing configuration
+
+## Quality thresholds (updated v0.0.3)
+
+| Metric | Threshold | Rationale |
+|---|---|---|
+| Flicker std | <= 0.01 | Perceptible flicker onset; measured on Mode C |
+| fg_entropy | >= 3.0 bits | 10-char palette max = log2(11) ≈ 3.46 bits; 3.0 is the discriminating threshold (tightened from 2.5 on 2026-04-18) |
+
+fg_entropy threshold raised from 2.5 to 3.0: at 2.5 the criterion passed trivially even for low-complexity inputs. 3.0 bits corresponds to ~86% of the 11-glyph palette's theoretical maximum, ensuring genuine character-level variation in foreground cells.

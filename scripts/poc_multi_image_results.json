@@ -1,0 +1,44 @@
+{
+  "version": "0.0.3",
+  "mode": "C",
+  "mode_config": {"bg": "black", "braille": "on"},
+  "threshold": {"flicker_std_max": 0.01, "fg_entropy_min": 3.0},
+  "images": [
+    {
+      "name": "bike_art_base.jpg",
+      "description": "bicycle art photo, 2.4MB, rembg mask cached (u2net)",
+      "rembg_available": true,
+      "flicker_std": 0.0086,
+      "fg_entropy": 3.179,
+      "aa_ms_per_frame": 34.0,
+      "size_kb": 114.5,
+      "flicker_pass": true,
+      "fg_entropy_pass": true
+    },
+    {
+      "name": "benchmark_result.jpg",
+      "description": "bar chart image, 189KB, no rembg (not installed) -> full mode fallback",
+      "rembg_available": false,
+      "flicker_std": 0.0190,
+      "fg_entropy": 1.793,
+      "aa_ms_per_frame": 35.3,
+      "size_kb": 306.0,
+      "flicker_pass": false,
+      "fg_entropy_pass": false,
+      "note": "rembg not installed in this environment; fell back to BG_MODE=full. Low fg_entropy expected for chart with large uniform areas."
+    },
+    {
+      "name": "synthetic.png",
+      "description": "256x256 generated geometric image (circles, rectangles, radial lines), no rembg -> full mode",
+      "rembg_available": false,
+      "flicker_std": 0.0107,
+      "fg_entropy": 1.603,
+      "aa_ms_per_frame": 33.9,
+      "size_kb": 270.0,
+      "flicker_pass": false,
+      "fg_entropy_pass": false,
+      "note": "rembg not installed; full mode. Low-complexity geometric image produces low entropy."
+    }
+  ],
+  "summary": "Mode C flicker_std PASS is NOT consistent across n=3 images. Only image 1 (bike_art_base.jpg, with u2net mask) passes. Images 2 and 3 fail because rembg is not installed in this environment, causing BG_MODE fallback to 'full' (no foreground isolation), which inflates flicker and collapses entropy. The flicker_std=0.0086 claim is valid for the intended Mode C (rembg + braille) but requires rembg to be installed."
+}

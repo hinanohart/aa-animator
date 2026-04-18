@@ -25,7 +25,7 @@ Open `out.mp4` in any player, or pipe into `ffplay` for an instant preview.
 
 - **Depth-parallax motion** — Depth Anything v2 Small (Apache-2.0, ~99 MB) estimates per-pixel depth; a forward-warp orbit animates ±8° of camera motion across 120 frames at 30 fps
 - **Ghostty-grade AA rendering** — 11-level density ramp, DoG+Sobel directional glyphs (`|/─\`), blue glow contour `(70, 130, 255)` matching the Ghostty +boo aesthetic
-- **Temporal stability** — EMA smoothing (α = 0.3) and time-fixed Bayer 4×4 dithering keep flicker below 5% avg char edit distance
+- **Temporal stability** — EMA smoothing (α = 0.3) and time-fixed Bayer 4×4 dithering keep flicker std below 0.01 (Mode C, bike_art_base, v0.0.3)
 - **CPU-first design** — full pipeline runs on CPU; 120-frame clip completes in ~14 s on a modern CPU (no GPU required)
 - **Multiple render styles** — `density`, `edge`, `block`, `braille`
 - **Seven colour modes** — `color`, `mono`, `matrix`, `cyber`, `amber`, `gradient`, `invert`
@@ -149,22 +149,23 @@ These curves are layered **on top of** parallax as per-character animation, prod
 
 *Demo GIF placeholder — will be replaced after v0.0.1 public Discord/X post (48-hour feedback window)*
 
-Mini PoC (internal evaluation, 2026-04-18):
-- Canvas: 100 × 41 chars (matching Ghostty canonical size)
-- Duration: 10 frames @ 30 fps
-- Flicker: **3.4% avg char edit distance** (threshold < 15%)
-- Pipeline time: ~10 s on CPU (DA-V2 model download included)
+Mini PoC (internal evaluation, 2026-04-18, v0.0.3 Mode C):
+- Canvas: 200 × 82 chars (Braille 2x4 dots, double resolution)
+- Duration: 30 frames @ 30 fps
+- Flicker: **flicker std 0.0086** (threshold std <= 0.01) — PASS
+- fg_entropy: 3.179 bits (threshold >= 3.0) — PASS
+- Pipeline time: ~4 s on CPU (depth + mask cached)
 
 ---
 
 ## Evaluation metrics
 
-| Metric | Mini PoC (v0.0.1) | v0.1 target |
+| Metric | v0.0.3 PoC (Mode C) | v0.1 target |
 |---|---|---|
-| Temporal flicker (char edit dist/frame) | 3.4% | < 15% |
+| Temporal flicker (flicker std) | 0.0086 | <= 0.01 |
 | SSIMULACRA2 vs Ghostty reference | not yet measured | ±10% |
-| Subject boundary jitter (IoU variance) | N/A (no seg in PoC) | < 0.02 |
-| Information density (char entropy) | not yet measured | > 2.5 bits |
+| Subject boundary jitter (IoU variance) | N/A | < 0.02 |
+| Information density (fg_entropy) | 3.179 bits | >= 3.0 bits |
 
 ---
 

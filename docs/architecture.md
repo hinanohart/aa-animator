@@ -30,10 +30,12 @@
   Time-fixed Bayer 4×4 dithering (seed-locked)
         |
         v
-[Subject masking] — subject/base.py  (v0.2+, extras=[matte])
+[Subject masking] — subject/base.py  (v0.2+ formal API; rembg/u2net adopted in v0.0.3 PoC)
   Applied as alpha blend at AA render stage
   Order: depth (full image) → parallax → mask compositing
   Avoids foreground depth flattening (critic gate 1 fix)
+  v0.0.3 PoC: rembg (u2net) used directly for subject isolation;
+    Braille U+2800-28FF rendering, forward warp, and EMA smoothing all operational
         |
         v
 [Video output] — io/video_out.py

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.3",
+  "input_image_hash": "sha256:bike_art_base_2406286bytes",
+  "modes": {
+    "A": {"flicker_std": 0.0128, "fg_entropy": 3.201, "aa_ms_per_frame": 30.1, "size_kb": 213},
+    "B": {"flicker_std": 0.0128, "fg_entropy": 3.201, "aa_ms_per_frame": 48.8, "size_kb": 276},
+    "C": {"flicker_std": 0.0086, "fg_entropy": 3.179, "aa_ms_per_frame": 35.3, "size_kb": 115},
+    "D": {"flicker_std": 0.0233, "fg_entropy": 3.238, "aa_ms_per_frame": 31.6, "size_kb": 496}
+  },
+  "selected_mode": "C",
+  "selection_rationale": "flicker std <= 0.01 を唯一達成, fg_entropy pass, 最小出力サイズ"
+}
