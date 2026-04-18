@@ -161,23 +161,31 @@ These curves are layered **on top of** parallax as per-character animation, prod
 
 *Demo GIF placeholder — will be replaced after v0.0.1 public Discord/X post (48-hour feedback window)*
 
-Mini PoC (internal evaluation, 2026-04-18, v0.0.3 Mode C):
-- Canvas: 200 × 82 chars (Braille 2x4 dots, double resolution)
-- Duration: 30 frames @ 30 fps
-- Flicker: **flicker std 0.0086** (threshold std <= 0.01) — PASS
-- fg_entropy: 3.179 bits (threshold >= 3.0) — PASS
+Validation (internal evaluation, 2026-04-18, v0.1 Mode C):
+
+**v0.1 flicker validation — n=10, 95% t-CI (df=9): [0.0027, 0.0073]**
+
+- 9/10 images pass flicker_std <= 0.01 (7 natural + 3 synthetic images)
+- Mean flicker_std: 0.0050 (well below 0.01 threshold)
+- Single failure: `benchmark_result.jpg` at 0.0111 (low fg_coverage=21% triggers max amp)
+- fg_entropy mean: 3.1+ bits (threshold >= 3.0)
 - Pipeline time: ~4 s on CPU (depth + mask cached)
+- Full audit trail: `docs/poc-validation.md`
+
+> Note: The earlier n=3 bootstrap CI `[0.0048, 0.0088]` was statistically invalid
+> (bootstrap on 3 points collapses to min/max). The n=10 t-CI above is the authoritative result.
 
 ---
 
 ## Evaluation metrics
 
-| Metric | v0.0.3 PoC (Mode C) | v0.1 target |
+| Metric | v0.1 n=10 (Mode C) | v0.1 target |
 |---|---|---|
-| Temporal flicker (flicker std) | 0.0086 | <= 0.01 |
+| Temporal flicker (flicker std, mean) | 0.0050 (t-CI [0.0027, 0.0073]) | <= 0.01 |
+| Pass rate | 9/10 images | — |
 | SSIMULACRA2 vs Ghostty reference | not yet measured | ±10% |
 | Subject boundary jitter (IoU variance) | N/A | < 0.02 |
-| Information density (fg_entropy) | 3.179 bits | >= 3.0 bits |
+| Information density (fg_entropy) | 3.1+ bits | >= 3.0 bits |
 
 ---
 
@@ -249,7 +257,7 @@ No source code from `sniklaus/softmax-splatting` was used or adapted (that repos
 
 ## Limitations
 
-- **Validation scale**: quality metrics (flicker std, fg_entropy) validated on n=3 internal test images. Results may vary with different subjects, lighting, or image resolution.
+- **Validation scale**: quality metrics (flicker std, fg_entropy) validated on n=10 internal test images (7 natural + 3 synthetic). Pass rate 9/10; results may vary with different subjects, lighting, or image resolution.
 - **Render font**: Braille block output requires a terminal / video player with a Braille-capable font. In environments without one, glyph density may render as boxes.
 - **Motion model**: parallax warp is a geometric approximation; it does not understand scene semantics (limbs, occlusion boundaries). Complex backgrounds may show tearing artifacts.
 - **Subject extraction**: `--subject-only` uses rembg (u2net); results degrade on cluttered backgrounds or transparent subjects.
