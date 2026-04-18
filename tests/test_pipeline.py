@@ -63,13 +63,31 @@ class TestAAAnimatorLoadImage:
         assert "loaded" in r
 
 
-class TestAAAnimatorDepthStub:
-    def test_depth_stub_returns_uniform(self, tmp_path) -> None:
+class TestAAAnimatorEstimateDepth:
+    def test_depth_returns_correct_shape(self, tmp_path) -> None:
         img_pil = Image.new("RGB", (64, 64), (100, 150, 200))
         a = AAAnimator(cols=16)
+        a._img_h = 64
+        a._img_w = 64
         depth = a.estimate_depth(img_pil)
         assert depth.shape == (64, 64)
-        assert float(depth.mean()) == pytest.approx(0.5)
+
+    def test_depth_values_in_range(self, tmp_path) -> None:
+        img_pil = Image.new("RGB", (32, 32), (200, 100, 50))
+        a = AAAnimator(cols=8)
+        a._img_h = 32
+        a._img_w = 32
+        depth = a.estimate_depth(img_pil)
+        assert float(depth.min()) >= 0.0
+        assert float(depth.max()) <= 1.0 + 1e-5
+
+    def test_depth_is_float32(self, tmp_path) -> None:
+        img_pil = Image.new("RGB", (32, 32), (50, 50, 50))
+        a = AAAnimator(cols=8)
+        a._img_h = 32
+        a._img_w = 32
+        depth = a.estimate_depth(img_pil)
+        assert depth.dtype == np.float32
 
 
 class TestAAAnimatorGenerateFrames:

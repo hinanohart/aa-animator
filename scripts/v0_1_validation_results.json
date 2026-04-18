@@ -1,0 +1,31 @@
+{
+  "version": "0.1.0-dev",
+  "images": {
+    "bike_art_base.jpg": {
+      "fg_coverage": 0.5006,
+      "amp_px_used": 11,
+      "flicker_std": 0.005415,
+      "pass": true,
+      "elapsed_s": 4.87
+    },
+    "bench_rgb.jpg": {
+      "fg_coverage": 0.5865,
+      "amp_px_used": 9,
+      "flicker_std": 0.004844,
+      "pass": true,
+      "elapsed_s": 4.6
+    },
+    "cliffhanger_base.png": {
+      "fg_coverage": 0.7499,
+      "amp_px_used": 7,
+      "flicker_std": 0.008815,
+      "pass": true,
+      "elapsed_s": 4.27
+    }
+  },
+  "bootstrap_ci_95": [
+    0.004844,
+    0.008815
+  ],
+  "consistent_pass": true
+}

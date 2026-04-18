@@ -71,6 +71,19 @@ def _build_parser() -> argparse.ArgumentParser:
         default=False,
         help="foreground-only AA (requires pip install 'aa-animator[matte]')",
     )
+    # Shorthand aliases used by validation scripts
+    animate.add_argument(
+        "--mode",
+        choices=["braille", "ascii"],
+        default=None,
+        help="rendering mode override (overrides --style)",
+    )
+    animate.add_argument(
+        "--bg",
+        choices=["black", "ghostty_fill"],
+        default=None,
+        help="background mode override (overrides --subject-only)",
+    )
 
     # ── preview ───────────────────────────────────────────────────────────────
     preview = sub.add_parser(
@@ -110,9 +123,15 @@ def _cmd_animate(args: argparse.Namespace) -> int:
 
     output_path = Path(args.output) if args.output else input_path.with_name(input_path.stem + "_aa.mp4")
 
-    # Map --style to renderer mode (braille stays braille, rest → ascii)
-    mode = "braille" if args.style == "braille" else "ascii"
-    bg: str = "black" if args.subject_only else "ghostty_fill"
+    # --mode overrides --style; --bg overrides --subject-only
+    if args.mode is not None:
+        mode = args.mode
+    else:
+        mode = "braille" if args.style == "braille" else "ascii"
+    if args.bg is not None:
+        bg: str = args.bg
+    else:
+        bg = "black" if args.subject_only else "ghostty_fill"
 
     animator = AAAnimator(
         mode=mode,  # type: ignore[arg-type]
@@ -141,21 +160,55 @@ def _cmd_animate(args: argparse.Namespace) -> int:
 
 
 def _cmd_preview(args: argparse.Namespace) -> int:
+    from aa_animator_v2.pipeline import AAAnimator
+
+    input_path = Path(args.input)
+    if not input_path.exists():
+        print(f"[aa-animator] error: input not found: {input_path}", file=sys.stderr)
+        return 1
+
+    mode = "braille" if args.style == "braille" else "ascii"
+    output_path = input_path.with_name(input_path.stem + "_preview.png")
+
+    animator = AAAnimator(mode=mode, bg="black", cols=args.cols, glow=True)  # type: ignore[arg-type]
+
     print(
-        f"[aa-animator] preview: input={args.input!r} style={args.style}",
+        f"[aa-animator] preview: input={input_path} output={output_path} style={args.style}",
         file=sys.stderr,
     )
-    print("[aa-animator] NOT IMPLEMENTED — full pipeline coming in v0.1", file=sys.stderr)
-    return 1
+
+    try:
+        animator.preview(input_path, output_path)
+    except Exception as exc:
+        print(f"[aa-animator] error: {exc}", file=sys.stderr)
+        return 1
+
+    return 0
 
 
 def _cmd_bake(args: argparse.Namespace) -> int:
+    from aa_animator_v2.pipeline import AAAnimator
+
+    input_path = Path(args.input)
+    if not input_path.exists():
+        print(f"[aa-animator] error: input not found: {input_path}", file=sys.stderr)
+        return 1
+
+    out_dir = Path(args.outdir)
+    animator = AAAnimator(mode="braille", bg="black", glow=True)
+
     print(
-        f"[aa-animator] bake: input={args.input!r} outdir={args.outdir!r}",
+        f"[aa-animator] bake: input={input_path} outdir={out_dir}",
         file=sys.stderr,
     )
-    print("[aa-animator] NOT IMPLEMENTED — full pipeline coming in v0.1", file=sys.stderr)
-    return 1
+
+    try:
+        animator.bake(input_path, out_dir)
+    except Exception as exc:
+        print(f"[aa-animator] error: {exc}", file=sys.stderr)
+        return 1
+
+    return 0
 
 
 def main() -> NoReturn:
