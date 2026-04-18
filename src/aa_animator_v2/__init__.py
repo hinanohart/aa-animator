@@ -12,5 +12,6 @@ Version:
 """
 
 from aa_animator_v2._version import __version__
+from aa_animator_v2.pipeline import AAAnimator
 
-__all__ = ["__version__"]
+__all__ = ["__version__", "AAAnimator"]

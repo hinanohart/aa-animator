@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 from typing import NoReturn
 
 from aa_animator_v2._version import __version__
@@ -100,15 +101,43 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _cmd_animate(args: argparse.Namespace) -> int:
+    from aa_animator_v2.pipeline import AAAnimator
+
+    input_path = Path(args.input)
+    if not input_path.exists():
+        print(f"[aa-animator] error: input not found: {input_path}", file=sys.stderr)
+        return 1
+
+    output_path = Path(args.output) if args.output else input_path.with_name(input_path.stem + "_aa.mp4")
+
+    # Map --style to renderer mode (braille stays braille, rest → ascii)
+    mode = "braille" if args.style == "braille" else "ascii"
+    bg: str = "black" if args.subject_only else "ghostty_fill"
+
+    animator = AAAnimator(
+        mode=mode,  # type: ignore[arg-type]
+        bg=bg,  # type: ignore[arg-type]
+        fps=args.fps,
+        cols=args.cols,
+        n_frames=int(args.duration * args.fps),
+        amp_px=args.amp_deg,
+        glow=args.glow,
+    )
+
     print(
-        f"[aa-animator] animate: input={args.input!r} style={args.style} "
-        f"color={args.color} cols={args.cols} fps={args.fps} "
-        f"duration={args.duration}s amp={args.amp_deg}° "
-        f"ema={args.ema} glow={args.glow} device={args.depth_device}",
+        f"[aa-animator] animate: input={input_path} output={output_path} "
+        f"style={args.style} cols={args.cols} fps={args.fps} "
+        f"duration={args.duration}s glow={args.glow}",
         file=sys.stderr,
     )
-    print("[aa-animator] NOT IMPLEMENTED — full pipeline coming in v0.1", file=sys.stderr)
-    return 1
+
+    try:
+        animator.animate(input_path, output_path)
+    except Exception as exc:
+        print(f"[aa-animator] error: {exc}", file=sys.stderr)
+        return 1
+
+    return 0
 
 
 def _cmd_preview(args: argparse.Namespace) -> int:
