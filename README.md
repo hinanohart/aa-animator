@@ -8,6 +8,13 @@
 
 One image in, one MP4 out. Depth-parallax warp drives the motion; edge-aware rendering and blue-glow contouring match Ghostty's visual standard. No hand-drawn frames, no fixed silhouette.
 
+> **Recommended preset**: `style_i` (long_cinematic + Ghostty palette + outline ring + blue glow).
+> After iterating through 10+ style variants (A–J), the `long_cinematic`-based pipeline delivered the most stable visual quality. Other styles (Braille, signal-driven, 3D lighting, bird/block-bob) are retained as experiments under `src/aa_animator_v2/style_*.py`.
+>
+> ```bash
+> aa-animator animate photo.jpg -o out.mp4 --style i
+> ```
+
 ---
 
 ## Quick Start
