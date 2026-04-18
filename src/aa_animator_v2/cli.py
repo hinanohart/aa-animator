@@ -59,7 +59,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     animate.add_argument(
         "--style",
-        choices=["density", "edge", "block", "braille"],
+        choices=["density", "edge", "block", "braille", "bird"],
         default="density",
     )
     animate.add_argument(
@@ -142,6 +142,24 @@ def _cmd_animate(args: argparse.Namespace) -> int:
         return 1
 
     output_path = Path(args.output) if args.output else input_path.with_name(input_path.stem + "_aa.mp4")
+
+    # Style H (bird) has its own render path — bypass AAAnimator
+    if args.style == "bird":
+        from aa_animator_v2.style_h_bird import generate_style_h
+
+        result = generate_style_h(
+            input_path,
+            output_path,
+            cols=args.cols,
+            fps=args.fps,
+            duration=args.duration,
+        )
+        print(
+            f"[aa-animator] animate: input={input_path} output={output_path} "
+            f"style=bird cols={args.cols} fps={args.fps} duration={args.duration}s",
+            file=sys.stderr,
+        )
+        return 0
 
     # --mode overrides --style; --bg overrides --subject-only
     if args.mode is not None:
