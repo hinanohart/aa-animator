@@ -29,6 +29,9 @@ jobs:
       # Refuse to release anything containing maintainer real-identity markers.
       # Pattern is built from fragments so the guard rule itself does not
       # self-match against its own definition.
+      # DOCUMENTED LIMITATION: This guard does NOT scan for softsplat code
+      # patterns (sniklaus API). That check is a manual maintainer responsibility
+      # before each release — see docs/legal-notes.md "Compliance procedure".
       - name: Identity-leak guard (history-wide)
         run: |
           set -euo pipefail

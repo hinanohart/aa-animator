@@ -23,7 +23,6 @@ Day 3 scope: Bayer dither mode, ffmpeg optimisation flags, DRY _prepare_run help
 from __future__ import annotations
 
 import hashlib
-import math
 import subprocess
 import sys
 from pathlib import Path
@@ -36,6 +35,14 @@ from scipy.ndimage import sobel as scipy_sobel  # type: ignore[import-untyped]
 from aa_animator_v2.parallax import dynamic_amp_px, fill_holes, forward_warp, orbit_displacement, warp_mask
 from aa_animator_v2.renderer import EDGE_THRESH, NCHARS, DitherMode, FrameRenderer, RenderMode
 from aa_animator_v2.smoothing import TemporalSmoother
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+# Canonical model ID for the Apache-2.0 Depth Anything V2 Small checkpoint.
+# Defined once here to prevent drift between code and docs/legal-notes.md.
+_DA_V2_MODEL_ID = "depth-anything/Depth-Anything-V2-Small-hf"
 
 # ---------------------------------------------------------------------------
 # Types
@@ -246,7 +253,7 @@ class AAAnimator:
 
             depth_pipe = hf_pipeline(
                 task="depth-estimation",
-                model="depth-anything/Depth-Anything-V2-Small-hf",
+                model=_DA_V2_MODEL_ID,
                 device=device,
             )
             result = depth_pipe(image)

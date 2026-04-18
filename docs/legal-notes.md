@@ -61,6 +61,6 @@ See `docs/license-map.md` for the full analysis. Summary:
 
 Only the Depth Anything v2 Small variant is Apache-2.0 licensed.
 Base and Large are CC-BY-NC-4.0 (non-commercial). The model ID used
-in production MUST be `LiheYoung/depth-anything-v2-small` or equivalent
-Small checkpoint. Using Base or Large weights in a release constitutes
-license violation.
+in production MUST be `depth-anything/Depth-Anything-V2-Small-hf`
+(the canonical HuggingFace Hub checkpoint). Using Base or Large weights
+in a release constitutes license violation.

@@ -44,6 +44,58 @@ Warning to v0.1 implementors: do not cite the 0.0086 figure as a general benchma
 
 ---
 
+# v0.1 Validation — n=10 Audit (Day 3.5)
+
+Date: 2026-04-18
+Script: `scripts/validate_v0_1.py`
+Full results: `scripts/v0_1_validation_results.json`
+
+## Motivation
+
+The n=3 bootstrap CI `[0.0048, 0.0088]` was statistically invalid (bootstrap
+on 3 points gives min/max, not a genuine interval). MEMORY.md疑義宣言 #3/#4
+mandates n≥10 and a proper CI method.
+
+## Method
+
+- n=10: 7 natural images (test_images/ public artworks) + 3 synthetic (PIL-generated)
+- CI: 95% Student t-interval (df=9), replacing the bootstrap
+- All images run with: `braille`, `bg=black`, `glow=True`, `cols=100`, `n_frames=30`
+
+## Results (n=10)
+
+| Image | Source | fg coverage | amp_px | flicker_std | PASS |
+|---|---|---|---|---|---|
+| bike_art_base.jpg | natural | 50.1% | 11 | 0.0054 | YES |
+| bench_rgb.jpg | natural | 58.7% | 9 | 0.0048 | YES |
+| cliffhanger_base.png | natural | 75.0% | 7 | 0.0088 | YES |
+| youtube_base.jpg | natural | 50.1% | 11 | 0.0054 | YES |
+| v3_main.jpg | natural | 47.2% | 11 | 0.0049 | YES |
+| final_200.jpg | natural | 53.2% | 10 | 0.0051 | YES |
+| benchmark_result.jpg | natural | 21.4% | 18 | **0.0111** | NO |
+| synthetic_portrait.png | synthetic | 46.8% | 12 | 0.0014 | YES |
+| synthetic_landscape.png | synthetic | 50.0% | 11 | 0.0009 | YES |
+| synthetic_abstract.png | synthetic | 53.1% | 10 | 0.0018 | YES |
+
+Mean flicker_std: **0.0050** | 95% t-CI (df=9): **[0.0027, 0.0073]** | Pass rate: 9/10
+
+## Honest Assessment
+
+**9/10 images pass.** The 95% t-CI upper bound 0.0073 is below the 0.01 threshold,
+meaning the mean performance is statistically within spec.
+
+The single failure (`benchmark_result.jpg`, flicker_std=0.0111) occurs because
+`fg_coverage=21.4%` triggers `amp_px=18` (max amplitude), which for this particular
+image produces more frame-to-frame variation. This is an edge case at the extremes
+of the dynamic-AMP formula.
+
+Audit trail:
+- v0.0.3 n=3 bootstrap: CI [0.0086, 0.0218] — CI crossed 0.01 threshold, 2/3 FAIL
+- v0.1 n=3 bootstrap: CI [0.0048, 0.0088] — statistically invalid (min/max only)
+- v0.1 n=10 t-CI: CI [0.0027, 0.0073] — valid interval, 9/10 PASS, mean well below threshold
+
+---
+
 # v0.1 Validation — Dynamic AMP + Edge EMA (Day 2)
 
 Date: 2026-04-18

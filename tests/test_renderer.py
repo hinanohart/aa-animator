@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from aa_animator_v2.renderer import (
     BRAILLE_BASE,
     NCHARS,
     FrameRenderer,
     _brightness_to_braille_bits_vectorised,
+    _load_font,
     brightness_to_braille,
 )
 
@@ -115,3 +115,14 @@ class TestFrameRenderer:
         arr = np.array(img)
         # All pixels should be black (masked out)
         assert arr.sum() == 0, f"expected all zeros, got sum={arr.sum()}"
+
+
+class TestFontFallback:
+    """Smoke test: _load_font must return a usable font object on any OS."""
+
+    def test_load_font_returns_something(self) -> None:
+        from PIL import ImageFont  # noqa: PLC0415
+
+        font = _load_font(10)
+        # Must be one of the two PIL font types (FreeType or default bitmap)
+        assert isinstance(font, (ImageFont.FreeTypeFont, ImageFont.ImageFont))

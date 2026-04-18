@@ -1,31 +1,126 @@
 {
   "version": "0.1.0-dev",
+  "n_total": 10,
+  "n_natural": 7,
+  "n_synthetic": 3,
   "images": {
     "bike_art_base.jpg": {
+      "source": "natural",
       "fg_coverage": 0.5006,
       "amp_px_used": 11,
       "flicker_std": 0.005415,
       "pass": true,
-      "elapsed_s": 4.87
+      "elapsed_s": 4.68,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
     },
     "bench_rgb.jpg": {
+      "source": "natural",
       "fg_coverage": 0.5865,
       "amp_px_used": 9,
       "flicker_std": 0.004844,
       "pass": true,
-      "elapsed_s": 4.6
+      "elapsed_s": 4.34,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
     },
     "cliffhanger_base.png": {
+      "source": "natural",
       "fg_coverage": 0.7499,
       "amp_px_used": 7,
       "flicker_std": 0.008815,
       "pass": true,
-      "elapsed_s": 4.27
+      "elapsed_s": 4.06,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "youtube_base.jpg": {
+      "source": "natural",
+      "fg_coverage": 0.5006,
+      "amp_px_used": 11,
+      "flicker_std": 0.005415,
+      "pass": true,
+      "elapsed_s": 4.54,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "v3_main.jpg": {
+      "source": "natural",
+      "fg_coverage": 0.4715,
+      "amp_px_used": 11,
+      "flicker_std": 0.004876,
+      "pass": true,
+      "elapsed_s": 10.75,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "final_200.jpg": {
+      "source": "natural",
+      "fg_coverage": 0.5315,
+      "amp_px_used": 10,
+      "flicker_std": 0.005055,
+      "pass": true,
+      "elapsed_s": 5.92,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "benchmark_result.jpg": {
+      "source": "natural",
+      "fg_coverage": 0.214,
+      "amp_px_used": 18,
+      "flicker_std": 0.011134,
+      "pass": false,
+      "elapsed_s": 6.33,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "synthetic_portrait.png": {
+      "source": "synthetic",
+      "fg_coverage": 0.4682,
+      "amp_px_used": 12,
+      "flicker_std": 0.001395,
+      "pass": true,
+      "elapsed_s": 6.1,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "synthetic_landscape.png": {
+      "source": "synthetic",
+      "fg_coverage": 0.5,
+      "amp_px_used": 11,
+      "flicker_std": 0.000878,
+      "pass": true,
+      "elapsed_s": 5.97,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
+    },
+    "synthetic_abstract.png": {
+      "source": "synthetic",
+      "fg_coverage": 0.5309,
+      "amp_px_used": 10,
+      "flicker_std": 0.001755,
+      "pass": true,
+      "elapsed_s": 6.14,
+      "mask_source": "otsu",
+      "canvas_cols": 100,
+      "canvas_rows": 41
     }
   },
-  "bootstrap_ci_95": [
-    0.004844,
-    0.008815
+  "mean_flicker_std": 0.004958,
+  "t_ci_95": [
+    0.002658,
+    0.007259
   ],
-  "consistent_pass": true
+  "ci_method": "Student t (df=9)",
+  "flicker_std_threshold": 0.01,
+  "consistent_pass": false
 }

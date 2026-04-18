@@ -53,8 +53,14 @@ RenderMode = Literal["ascii", "braille"]
 DitherMode = Literal["none", "bayer"]
 
 _FONT_PATHS: list[str] = [
+    # Linux (DejaVu)
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+    # macOS system fonts
+    "/System/Library/Fonts/Monaco.ttf",
+    "/Library/Fonts/Menlo.ttc",
+    "/System/Library/Fonts/Menlo.ttc",
+    "/System/Library/Fonts/Supplemental/Courier New.ttf",
 ]
 
 

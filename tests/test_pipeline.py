@@ -7,6 +7,7 @@ import pytest
 from PIL import Image
 
 from aa_animator_v2 import AAAnimator
+from aa_animator_v2.pipeline import _DA_V2_MODEL_ID
 
 
 class TestAAAnimatorInstantiation:
@@ -135,3 +136,18 @@ class TestAAAnimatorRenderFrames:
             w, h = frame.size
             assert w == a.cols * a._cell_w
             assert h == a._rows * a._cell_h
+
+
+class TestModelIdDriftGuard:
+    """Ensure _DA_V2_MODEL_ID matches the expected Apache-2.0 checkpoint.
+
+    If this test fails it means the model ID was changed without updating
+    docs/legal-notes.md — a potential license violation (Base/Large are
+    CC-BY-NC-4.0, only Small is Apache-2.0).
+    """
+
+    def test_da_v2_model_id_is_canonical(self) -> None:
+        assert _DA_V2_MODEL_ID == "depth-anything/Depth-Anything-V2-Small-hf", (
+            f"Model ID drifted to {_DA_V2_MODEL_ID!r}. "
+            "Update docs/legal-notes.md and verify the new checkpoint is Apache-2.0 licensed."
+        )
