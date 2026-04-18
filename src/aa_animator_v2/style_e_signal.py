@@ -390,7 +390,10 @@ def generate_style_e(
 
     # Assert char_grid was never mutated
     assert char_grid == char_grid_copy, "char_grid was mutated between frames — invariant violated"
-    assert mask_varied or n_frames <= 1, "glow_mask never varied across frames — signal not working"
+    # pulse signal: animation is in alpha channel (pulse_alpha), not the bool mask
+    # — all-True mask is correct by design, so skip mask-variation check for it
+    if signal != "pulse":
+        assert mask_varied or n_frames <= 1, "glow_mask never varied across frames — signal not working"
 
     return {
         "output_path": str(output_path),

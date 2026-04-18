@@ -148,6 +148,11 @@ class TestSignalDynamics:
         alphas = [pulse_alpha(i / 30.0) for i in range(60)]
         assert max(alphas) - min(alphas) > 0.1, "pulse_alpha must oscillate"
 
+    def test_pulse_mask_all_true_by_design(self) -> None:
+        """pulse animation is alpha-only; boolean mask is intentionally all-True."""
+        mask = signal_pulse(0.0, self.ROWS, self.COLS)
+        assert mask.all(), "pulse mask should be all-True by design"
+
 
 # ---------------------------------------------------------------------------
 # render_frame — char_grid invariance
