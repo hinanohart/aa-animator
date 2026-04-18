@@ -84,6 +84,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="background mode override (overrides --subject-only)",
     )
+    animate.add_argument(
+        "--dither",
+        choices=["none", "bayer"],
+        default="none",
+        help="ordered dither mode for brightness quantisation",
+    )
 
     # ── preview ───────────────────────────────────────────────────────────────
     preview = sub.add_parser(
@@ -141,6 +147,7 @@ def _cmd_animate(args: argparse.Namespace) -> int:
         n_frames=int(args.duration * args.fps),
         amp_px=args.amp_deg,
         glow=args.glow,
+        dither=args.dither,  # type: ignore[arg-type]
     )
 
     print(

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0.dev1] — 2026-04-18 (pre-release, Day 3)
+
+### Added
+
+- **Bayer dither mode**: `--dither bayer` applies 4×4 ordered dither before brightness quantisation; breaks flat-tone banding in uniform regions (`src/aa_animator_v2/dither.py`)
+- **`_prepare_run` DRY helper**: `animate`, `preview`, `bake` now share a single `_prepare_run(input_path)` method — eliminates 3× duplication of load/segment/depth/warp-mask logic
+- **Mask artefact export** in `validate_v0_1.py`: saves `{stem}_mask.png` to `--out-dir/masks/` and records `mask_source` (`"rembg"` | `"otsu"`), `canvas_cols`, `canvas_rows` in JSON output
+
+### Changed
+
+- **rembg promoted to required dependency** (was `[matte]` optional extra); `[matte]` extra kept empty for backward compatibility
+- **ffmpeg flags optimised**: `-preset medium -crf 20 -g 15 -keyint_min 15 -tune animation -movflags +faststart` — keyframe density for smooth playback, animation tuning, web-ready moov atom placement
+- **pytest filterwarnings**: added `ignore` rules for `transformers.*`, `huggingface_hub.*`, `torch.*` DeprecationWarning / FutureWarning / UserWarning to reduce test noise
+- **`release.yml`**: added comment on FRAG pattern split-token technique
+
 ## [0.0.3] — 2026-04-18 (pre-release PoC, no PyPI release)
 
 ### Added

@@ -48,6 +48,16 @@ Open `out.mp4` in any player, or pipe into `ffplay` for an instant preview.
 
 ---
 
+## System Requirements
+
+- Python 3.10–3.13
+- ffmpeg on PATH
+- **Installed size ~3 GB** (torch + transformers + rembg + onnxruntime weights downloaded at first run)
+- CPU: ~14 s for a 120-frame clip (depth + mask cached after first run)
+- GPU: CUDA-capable GPU reduces depth estimation to < 1 s
+
+---
+
 ## Installation
 
 ### CPU (recommended for most users)

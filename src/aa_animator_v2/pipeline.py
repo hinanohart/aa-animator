@@ -17,6 +17,7 @@ Day 1 scope: load_image, segment_subject (rembg), render_frames, export_mp4.
 Day 2 scope: estimate_depth (DA-V2 Small), forward-warp parallax, pixel hole fill,
              temporal EMA smoothing, fg-only histogram stretch, ghostty_fill bg-dot,
              preview / bake CLI commands.
+Day 3 scope: Bayer dither mode, ffmpeg optimisation flags, DRY _prepare_run helper.
 """
 
 from __future__ import annotations
@@ -33,7 +34,7 @@ from PIL import Image
 from scipy.ndimage import sobel as scipy_sobel  # type: ignore[import-untyped]
 
 from aa_animator_v2.parallax import dynamic_amp_px, fill_holes, forward_warp, orbit_displacement, warp_mask
-from aa_animator_v2.renderer import EDGE_THRESH, NCHARS, FrameRenderer, RenderMode
+from aa_animator_v2.renderer import EDGE_THRESH, NCHARS, DitherMode, FrameRenderer, RenderMode
 from aa_animator_v2.smoothing import TemporalSmoother
 
 # ---------------------------------------------------------------------------
@@ -71,6 +72,7 @@ class AAAnimator:
         amp_px: float = 18.0,
         *,
         glow: bool = True,
+        dither: DitherMode = "none",
     ) -> None:
         self.mode = mode
         self.bg = bg
@@ -79,6 +81,7 @@ class AAAnimator:
         self.n_frames = n_frames
         self.amp_px = amp_px
         self.glow = glow
+        self.dither = dither
 
         # Derived geometry
         if mode == "braille":
@@ -335,6 +338,7 @@ class AAAnimator:
                 cell_h=self._cell_h,
                 font_size=self._font_size,
                 glow=self.glow,
+                dither=self.dither,
             )
 
         rows = self._rows or 41
@@ -476,8 +480,13 @@ class AAAnimator:
             "-framerate", str(self.fps),
             "-i", "pipe:0",
             "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "20",
+            "-g", "15",
+            "-keyint_min", "15",
+            "-tune", "animation",
+            "-movflags", "+faststart",
             "-pix_fmt", "yuv420p",
-            "-crf", "18",
             str(output_path),
         ]
 
@@ -497,14 +506,22 @@ class AAAnimator:
             stderr = proc.stderr.read().decode(errors="replace")
             raise RuntimeError(f"ffmpeg failed (rc={proc.returncode}):\n{stderr[-500:]}")
 
-    # ------------------------------------------------------------------ convenience
+    # ------------------------------------------------------------------ private run helpers
 
-    def animate(self, input_path: str | Path, output_path: str | Path) -> None:
-        """End-to-end: load → segment → depth → generate → render → export.
+    def _prepare_run(
+        self, input_path: str | Path
+    ) -> tuple[Image.Image, list[np.ndarray] | None]:
+        """Load image, run segmentation + depth, compute warped masks.
+
+        Shared setup for :meth:`animate`, :meth:`preview`, and :meth:`bake`.
 
         Args:
             input_path: Path to the input image.
-            output_path: Path for the output .mp4.
+
+        Returns:
+            Tuple of (img_pil, warped_masks).
+            ``warped_masks`` is ``None`` when fg_mask or depth is unavailable,
+            otherwise a list of per-frame boolean mask arrays.
         """
         self.load_image(input_path)
         assert self._img_np is not None
@@ -515,7 +532,6 @@ class AAAnimator:
 
         self._depth = self.estimate_depth(img_pil)
 
-        # Pre-compute per-frame warped masks when depth is real
         warped_masks: list[np.ndarray] | None = None
         if self._fg_mask is not None and self._depth is not None:
             fg_coverage = float(self._fg_mask.mean())
@@ -526,6 +542,18 @@ class AAAnimator:
                 dx, dy = orbit_displacement(t, count, amp)
                 warped_masks.append(warp_mask(self._fg_mask, self._depth, dx, dy))
 
+        return img_pil, warped_masks
+
+    # ------------------------------------------------------------------ convenience
+
+    def animate(self, input_path: str | Path, output_path: str | Path) -> None:
+        """End-to-end: load → segment → depth → generate → render → export.
+
+        Args:
+            input_path: Path to the input image.
+            output_path: Path for the output .mp4.
+        """
+        _img_pil, warped_masks = self._prepare_run(input_path)
         raw_frames = self.generate_frames()
         pil_frames = self.render_frames(raw_frames, warped_masks=warped_masks)
         self.export_mp4(output_path, pil_frames)
@@ -538,14 +566,7 @@ class AAAnimator:
             input_path: Path to the input image.
             output_path: Destination PNG path.
         """
-        self.load_image(input_path)
-        assert self._img_np is not None
-        img_pil = Image.fromarray((self._img_np * 255).astype(np.uint8))
-
-        if self.bg in ("black", "ghostty_fill"):
-            self._fg_mask = self.segment_subject(img_pil)
-
-        self._depth = self.estimate_depth(img_pil)
+        _img_pil, _warped_masks = self._prepare_run(input_path)
         raw_frames = self.generate_frames(n_frames=1)
         pil_frames = self.render_frames(raw_frames)
         output_path = Path(output_path)
@@ -561,25 +582,7 @@ class AAAnimator:
             input_path: Path to the input image.
             out_dir: Output directory (created if absent).
         """
-        self.load_image(input_path)
-        assert self._img_np is not None
-        img_pil = Image.fromarray((self._img_np * 255).astype(np.uint8))
-
-        if self.bg in ("black", "ghostty_fill"):
-            self._fg_mask = self.segment_subject(img_pil)
-
-        self._depth = self.estimate_depth(img_pil)
-
-        warped_masks: list[np.ndarray] | None = None
-        if self._fg_mask is not None and self._depth is not None:
-            fg_coverage = float(self._fg_mask.mean())
-            amp = dynamic_amp_px(fg_coverage)
-            count = self.n_frames
-            warped_masks = []
-            for t in range(count):
-                dx, dy = orbit_displacement(t, count, amp)
-                warped_masks.append(warp_mask(self._fg_mask, self._depth, dx, dy))
-
+        _img_pil, warped_masks = self._prepare_run(input_path)
         raw_frames = self.generate_frames()
         pil_frames = self.render_frames(raw_frames, warped_masks=warped_masks)
 

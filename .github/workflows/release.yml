@@ -32,6 +32,8 @@ jobs:
       - name: Identity-leak guard (history-wide)
         run: |
           set -euo pipefail
+          # FRAG pattern: identity tokens are split at source to avoid matching
+          # in simple grep-based secret scanners. See yuragi v0.5.1 precedent.
           FRAG_A='run''za'
           FRAG_B='DESKTOP-[A-Z0-9]+'
           FRAG_C='/mnt/c/'

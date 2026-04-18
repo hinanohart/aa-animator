@@ -23,6 +23,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+MASK_DIR: Path | None = None  # set after args parsed
+
 # ── CLI ──────────────────────────────────────────────────────────────────────
 _parser = argparse.ArgumentParser(description="aa-animator v0.1 validation")
 _parser.add_argument(
@@ -47,6 +49,8 @@ IMAGE_DIR = Path(_args.image_dir)
 OUT_DIR = Path(_args.out_dir)
 N_BOOTSTRAP = _args.n_bootstrap
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+MASK_DIR = OUT_DIR / "masks"
+MASK_DIR.mkdir(parents=True, exist_ok=True)
 
 TEST_IMAGES = [
     "bike_art_base.jpg",
@@ -92,8 +96,28 @@ def run_image(image_name: str) -> dict:
     assert animator._img_np is not None
     img_pil = Image.fromarray((animator._img_np * 255).astype(np.uint8))
 
+    # Detect mask source: attempt rembg; track which path was taken
+    mask_source = "otsu"
+    try:
+        from rembg import remove as _rembg_remove  # type: ignore[import-not-found]
+        rgba = _rembg_remove(img_pil)
+        alpha = np.array(rgba, dtype=np.float32)[:, :, 3]
+        thresh = animator._otsu_threshold(alpha.astype(np.uint8))
+        candidate = alpha > thresh
+        if candidate.mean() >= 0.05:
+            mask_source = "rembg"
+    except Exception:
+        pass
+
     animator._fg_mask = animator.segment_subject(img_pil)
     animator._depth = animator.estimate_depth(img_pil)
+
+    # Save mask PNG artefact
+    if animator._fg_mask is not None and MASK_DIR is not None:
+        stem = Path(image_name).stem
+        mask_png = MASK_DIR / f"{stem}_mask.png"
+        mask_u8 = (animator._fg_mask.astype(np.uint8) * 255)
+        Image.fromarray(mask_u8).save(str(mask_png))
 
     fg_coverage = float(animator._fg_mask.mean()) if animator._fg_mask is not None else 0.3
 
@@ -120,6 +144,9 @@ def run_image(image_name: str) -> dict:
         "flicker_std": round(std, 6),
         "pass": bool(std <= FLICKER_STD_THRESH),
         "elapsed_s": round(elapsed, 2),
+        "mask_source": mask_source,
+        "canvas_cols": animator.cols,
+        "canvas_rows": animator._rows,
     }
 
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aa-animator"
-version = "0.0.1"
+version = "0.1.0.dev1"
 description = "Still image → subject-only animated ASCII art video. Depth-parallax warp + Ghostty-grade rendering."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -43,6 +43,8 @@ dependencies = [
   "pillow>=10.0",
   "opencv-python-headless>=4.8",
   "scipy>=1.11",
+  "rembg>=2.0",
+  "onnxruntime>=1.15",
   "torch>=2.1",
   "transformers>=4.40",
   "huggingface-hub>=0.24",
@@ -50,10 +52,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-matte = [
-  "rembg>=2.0",
-  # v0.2+: BiRefNet, sam2 (added when stable extra packaging is confirmed)
-]
+# matte is now empty — rembg promoted to required dependency in v0.1.0.dev1
+# Kept for backward compatibility with existing install instructions.
+matte = []
 i2v = [
   "diffusers>=0.27",
   "accelerate>=0.29",
@@ -101,7 +102,13 @@ exclude = [
 minversion = "8.0"
 testpaths = ["tests"]
 addopts = "-ra --strict-config --strict-markers"
-filterwarnings = ["error"]
+filterwarnings = [
+  "error",
+  "ignore::DeprecationWarning:transformers.*",
+  "ignore::DeprecationWarning:huggingface_hub.*",
+  "ignore::UserWarning:torch.*",
+  "ignore::FutureWarning:torch.*",
+]
 
 [tool.ruff]
 line-length = 100

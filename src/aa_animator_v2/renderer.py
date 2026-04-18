@@ -24,6 +24,8 @@ from typing import Literal
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
+from aa_animator_v2.dither import apply_bayer
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -48,6 +50,7 @@ EDGE_THRESH: float = 0.15
 
 ColorMode = Literal["color", "mono", "matrix", "cyber", "amber", "gradient", "invert"]
 RenderMode = Literal["ascii", "braille"]
+DitherMode = Literal["none", "bayer"]
 
 _FONT_PATHS: list[str] = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
@@ -180,12 +183,14 @@ class FrameRenderer:
         font_size: int = 10,
         *,
         glow: bool = True,
+        dither: DitherMode = "none",
     ) -> None:
         self.mode = mode
         self.cell_w = cell_w
         self.cell_h = cell_h
         self.font_size = font_size
         self.glow = glow
+        self.dither = dither
 
         self._font = _load_font(font_size)
         self._ascii_bitmaps = self._build_ascii_bitmaps()  # (NCHARS, 2, cell_h, cell_w, 3)
@@ -237,6 +242,10 @@ class FrameRenderer:
 
         if mask_cell is None:
             mask_cell = np.ones((rows, cols), dtype=bool)
+
+        # Apply ordered dither before quantisation (operates on cell-level brightness)
+        if self.dither == "bayer":
+            cell_brightness = apply_bayer(cell_brightness)
 
         if self.mode == "braille":
             canvas_u8 = self._render_braille(cell_brightness, rows, cols, canvas_h, canvas_w)
