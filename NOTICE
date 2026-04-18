@@ -1,0 +1,68 @@
+aa-animator
+Copyright 2026 Hinano Hart <hinanohart@gmail.com>
+
+Licensed under the Apache License, Version 2.0 (the "License").
+See LICENSE for full terms.
+
+This product includes or depends upon software developed by:
+
+  Depth Anything V2 (Apache-2.0)
+    Lihe Yang, Bingyi Kang, Zilong Huang, Zhen Zhao, Xiaogang Xu,
+    Jiashi Feng, Chunhua Shen
+    https://github.com/DepthAnything/Depth-Anything-V2
+    Model weights downloaded at runtime; not bundled in this package.
+
+  PyTorch (BSD-3-Clause)
+    Copyright (c) Meta Platforms, Inc. and affiliates
+    https://github.com/pytorch/pytorch
+
+  NumPy (BSD-3-Clause)
+    Copyright (c) 2005-2024, NumPy Developers
+    https://github.com/numpy/numpy
+
+  Pillow (HPND)
+    Copyright (c) 1997-2011 by Secret Labs AB
+    Copyright (c) 1995-2011 by Fredrik Lundh
+    Copyright (c) 2010-2024 by Alex Clark and contributors
+    https://github.com/python-pillow/Pillow
+
+  OpenCV (Apache-2.0)
+    Copyright (c) 2000-2024, Intel Corporation, Willow Garage, Inc.,
+    Itseez Inc.
+    https://github.com/opencv/opencv
+
+  SciPy (BSD-3-Clause)
+    Copyright (c) 2001-2024, SciPy Developers
+    https://github.com/scipy/scipy
+
+  Transformers (Apache-2.0)
+    Copyright 2018- The Hugging Face team
+    https://github.com/huggingface/transformers
+
+  HuggingFace Hub (Apache-2.0)
+    Copyright 2022- The Hugging Face team
+    https://github.com/huggingface/huggingface_hub
+
+  tqdm (MIT/MPL-2.0)
+    Copyright (c) 2013 noamraph; 2015-2024 Casper da Costa-Luis et al.
+    https://github.com/tqdm/tqdm
+
+Optional extras (installed separately, not bundled):
+
+  rembg [matte extra] (MIT)
+    Copyright (c) 2021 Daniel Gatis
+    https://github.com/danielgatis/rembg
+
+  diffusers [i2v extra] (Apache-2.0)
+    Copyright 2022- The HuggingFace team
+    https://github.com/huggingface/diffusers
+
+  accelerate [i2v extra] (Apache-2.0)
+    Copyright 2022- The HuggingFace team
+    https://github.com/huggingface/accelerate
+
+The forward-warp algorithm in this package is derived from concepts
+described in the following paper (no source code was copied or adapted):
+
+  Niklaus, S., & Liu, F. (2020). Softmax Splatting for Video Frame
+  Interpolation. CVPR 2020. arXiv:2003.07360.
