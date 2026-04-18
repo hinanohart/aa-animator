@@ -3,42 +3,51 @@
   "mode": "C",
   "mode_config": {"bg": "black", "braille": "on"},
   "threshold": {"flicker_std_max": 0.01, "fg_entropy_min": 3.0},
+  "rembg_available": true,
+  "rembg_version": "2.0.75",
+  "tested_at": "2026-04-18",
   "images": [
     {
       "name": "bike_art_base.jpg",
-      "description": "bicycle art photo, 2.4MB, rembg mask cached (u2net)",
+      "description": "bicycle art photo, 2.3MB, 2559x1439, rembg mask coverage=28.4%",
       "rembg_available": true,
+      "mask_coverage": 0.284,
       "flicker_std": 0.0086,
       "fg_entropy": 3.179,
-      "aa_ms_per_frame": 34.0,
+      "aa_ms_per_frame": 37.4,
       "size_kb": 114.5,
       "flicker_pass": true,
       "fg_entropy_pass": true
     },
     {
-      "name": "benchmark_result.jpg",
-      "description": "bar chart image, 189KB, no rembg (not installed) -> full mode fallback",
-      "rembg_available": false,
-      "flicker_std": 0.0190,
-      "fg_entropy": 1.793,
-      "aa_ms_per_frame": 35.3,
-      "size_kb": 306.0,
+      "name": "bench_rgb.jpg",
+      "description": "outdoor bench photo, 7.0MB, 3150x4200, rembg mask coverage=59.0%",
+      "rembg_available": true,
+      "mask_coverage": 0.590,
+      "flicker_std": 0.0218,
+      "fg_entropy": 3.355,
+      "aa_ms_per_frame": 41.3,
+      "size_kb": 384.5,
       "flicker_pass": false,
-      "fg_entropy_pass": false,
-      "note": "rembg not installed in this environment; fell back to BG_MODE=full. Low fg_entropy expected for chart with large uniform areas."
+      "fg_entropy_pass": true
     },
     {
-      "name": "synthetic.png",
-      "description": "256x256 generated geometric image (circles, rectangles, radial lines), no rembg -> full mode",
-      "rembg_available": false,
-      "flicker_std": 0.0107,
-      "fg_entropy": 1.603,
-      "aa_ms_per_frame": 33.9,
-      "size_kb": 270.0,
+      "name": "cliffhanger_base.png",
+      "description": "landscape scene, 974KB, 1200x630, rembg mask coverage=34.1%",
+      "rembg_available": true,
+      "mask_coverage": 0.341,
+      "flicker_std": 0.0190,
+      "fg_entropy": 3.064,
+      "aa_ms_per_frame": 37.1,
+      "size_kb": 198.1,
       "flicker_pass": false,
-      "fg_entropy_pass": false,
-      "note": "rembg not installed; full mode. Low-complexity geometric image produces low entropy."
+      "fg_entropy_pass": true
     }
   ],
-  "summary": "Mode C flicker_std PASS is NOT consistent across n=3 images. Only image 1 (bike_art_base.jpg, with u2net mask) passes. Images 2 and 3 fail because rembg is not installed in this environment, causing BG_MODE fallback to 'full' (no foreground isolation), which inflates flicker and collapses entropy. The flicker_std=0.0086 claim is valid for the intended Mode C (rembg + braille) but requires rembg to be installed."
+  "bootstrap_ci_95": [0.0086, 0.0218],
+  "point_mean_flicker_std": 0.0165,
+  "consistent_pass": false,
+  "n_images": 3,
+  "summary": "rembg was operational (v2.0.75) for all 3 images. Mode C flicker_std PASS is NOT consistent across n=3. Only bike_art_base.jpg (28.4% fg coverage, compact subject) achieves std=0.0086 <= 0.01. bench_rgb.jpg (59.0% fg, tall vertical subject) and cliffhanger_base.png (34.1% fg, landscape) both fail at 0.0218 and 0.0190 respectively. Bootstrap 95% CI [0.0086, 0.0218] crosses the 0.01 threshold; the claim does not generalize. fg_entropy passes on all 3 images (>=3.0), confirming that image complexity is not the bottleneck. The flicker failure is caused by large fg coverage + deep parallax warp producing visible jitter in Mode C. v0.1 requires pixel-level hole fill and/or warp smoothing to generalize flicker_std <= 0.01.",
+  "conclusion": "C-mode alone insufficient for generalization. v0.1 must address: (1) pixel-level hole fill for high-coverage fg masks, (2) warp amplitude scaling by fg_coverage to limit jitter."
 }
