@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Q&A — ask a question
+    url: https://github.com/hinanohart/aa-animator/discussions/categories/q-a
+    about: Use Discussions for questions; Issues are for confirmed bugs and feature requests.
+  - name: Ideas & feature discussion
+    url: https://github.com/hinanohart/aa-animator/discussions/categories/ideas
+    about: Share and discuss new feature ideas.
+  - name: Show & tell — share your output
+    url: https://github.com/hinanohart/aa-animator/discussions/categories/showcase
+    about: Post your generated AA animations here.

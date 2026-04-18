@@ -1,0 +1,31 @@
+title: "[Idea] "
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share your feature idea or improvement suggestion. No need to open an issue — this is the right place for exploratory proposals.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What do you have in mind?
+      description: Describe the capability, use case, or improvement you would like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why would this be useful?
+      description: Who benefits, and in what scenario?
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Any examples or references?
+      description: Links, screenshots, or prior art that illustrate the idea.
+    validations:
+      required: false

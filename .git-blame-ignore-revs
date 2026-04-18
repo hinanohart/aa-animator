@@ -1,0 +1,12 @@
+# Large bulk commits excluded from git blame.
+# Usage: git blame --ignore-revs-file .git-blame-ignore-revs <file>
+# Or set globally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Day 1: initial skeleton + Braille renderer (bulk scaffold)
+ebae9e3f897ee3f003882f774b7a8028753bd164
+
+# Day 2: depth + parallax + dynamic AMP (large feature commit)
+ac8aa11be9ff83ec2d67f2d227a2dcb0d37fbff5
+
+# Day 3: Bayer dither + ffmpeg optimisation + DRY refactor
+6bb7f7e83b6ddd2345fe84d9e8ccc4a8e2daea75

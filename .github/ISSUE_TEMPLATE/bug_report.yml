@@ -1,0 +1,57 @@
+name: Bug report
+description: Something is broken
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, please check [existing issues](https://github.com/hinanohart/aa-animator/issues) and [Discussions Q&A](https://github.com/hinanohart/aa-animator/discussions/categories/q-a).
+
+  - type: input
+    id: version
+    attributes:
+      label: aa-animator version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.3"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / platform
+      placeholder: "Ubuntu 22.04 / macOS 14 / Windows WSL2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you expect, and what actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction command
+      description: The exact command that triggers the bug
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Full error output / traceback
+      render: text
+    validations:
+      required: false

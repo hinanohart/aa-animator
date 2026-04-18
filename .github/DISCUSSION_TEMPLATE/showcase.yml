@@ -1,0 +1,39 @@
+title: "[Showcase] "
+labels: [showcase]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Show off your aa-animator output! Share a GIF, MP4 link, or screenshot. All subjects welcome.
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Your animated output
+      description: Paste an image/GIF, link to a video host, or embed a clip.
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: Command used
+      placeholder: "aa-animator animate portrait.jpg --style braille --color cyber"
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: aa-animator version
+      placeholder: "0.1.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Subject, lighting conditions, hardware, anything else worth sharing.
+    validations:
+      required: false

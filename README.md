@@ -13,11 +13,13 @@ One image in, one MP4 out. Depth-parallax warp drives the motion; edge-aware ren
 ## Quick Start
 
 ```bash
-pip install aa-animator
-aa-animator animate photo.jpg out.mp4
+pip install aa-animator          # ~3 GB total install (torch + model weights)
+aa-animator animate photo.jpg -o out.mp4
 ```
 
 Open `out.mp4` in any player, or pipe into `ffplay` for an instant preview.
+
+Expected output: a 4-second MP4 (120 frames at 30 fps) showing your subject rendered in Braille/density ASCII glyphs with a blue glow edge contour, orbiting through a ±8° parallax motion. First run downloads Depth Anything V2 Small weights (~99 MB) via HuggingFace Hub.
 
 ---
 
@@ -52,7 +54,7 @@ Open `out.mp4` in any player, or pipe into `ffplay` for an instant preview.
 
 - Python 3.10–3.13
 - ffmpeg on PATH
-- **Installed size ~3 GB** (torch + transformers + rembg + onnxruntime weights downloaded at first run)
+- **Installed size ~3 GB** — torch (~2.5 GB) + transformers + onnxruntime; Depth Anything V2 Small weights (~99 MB) downloaded at first run and cached by HuggingFace Hub
 - CPU: ~14 s for a 120-frame clip (depth + mask cached after first run)
 - GPU: CUDA-capable GPU reduces depth estimation to < 1 s
 
@@ -245,9 +247,25 @@ No source code from `sniklaus/softmax-splatting` was used or adapted (that repos
 
 ---
 
+## Limitations
+
+- **Validation scale**: quality metrics (flicker std, fg_entropy) validated on n=3 internal test images. Results may vary with different subjects, lighting, or image resolution.
+- **Render font**: Braille block output requires a terminal / video player with a Braille-capable font. In environments without one, glyph density may render as boxes.
+- **Motion model**: parallax warp is a geometric approximation; it does not understand scene semantics (limbs, occlusion boundaries). Complex backgrounds may show tearing artifacts.
+- **Subject extraction**: `--subject-only` uses rembg (u2net); results degrade on cluttered backgrounds or transparent subjects.
+- **Install size**: ~3 GB due to PyTorch. A lightweight CPU-only variant is not yet available.
+- **Platform**: tested on Linux (Ubuntu 22.04) and macOS 14. Windows is untested (WSL2 should work).
+- **AI motion (i2v)**: v0.4 feature, not included in v0.1. Requires 24 GB+ VRAM.
+
+Ghostty is the aesthetic inspiration; aa-animator is not affiliated with or endorsed by the Ghostty project.
+
+---
+
 ## Contributing
 
-Issues and PRs welcome. Please read the security policy in [SECURITY.md](SECURITY.md) before reporting vulnerabilities.
+Issues and PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, commit style, and the personal-info leak check procedure. Please read the security policy in [SECURITY.md](SECURITY.md) before reporting vulnerabilities.
+
+Feedback is welcome — if something breaks or looks wrong, please [open an issue](https://github.com/hinanohart/aa-animator/issues) or start a [Discussion](https://github.com/hinanohart/aa-animator/discussions).
 
 ---
 

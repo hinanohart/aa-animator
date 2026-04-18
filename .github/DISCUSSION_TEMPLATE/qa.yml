@@ -1,0 +1,30 @@
+title: "[Q] "
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask any question about aa-animator. Please search existing discussions before posting.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: aa-animator version (if relevant)
+      placeholder: "0.1.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Commands run, docs consulted, error messages seen.
+    validations:
+      required: false
