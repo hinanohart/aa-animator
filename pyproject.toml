@@ -103,11 +103,25 @@ minversion = "8.0"
 testpaths = ["tests"]
 addopts = "-ra --strict-config --strict-markers"
 filterwarnings = [
+  # Treat all warnings as errors by default to catch project-level regressions.
   "error",
-  "ignore::DeprecationWarning:transformers.*",
-  "ignore::DeprecationWarning:huggingface_hub.*",
-  "ignore::UserWarning:torch.*",
-  "ignore::FutureWarning:torch.*",
+  # Third-party libraries emit DeprecationWarning/FutureWarning/UserWarning on
+  # their own internal APIs that we do not control.  Suppress only those
+  # originating from the library packages themselves (module regex anchored to
+  # the package root) so that warnings from *our* code still become errors.
+  # When upgrading these libraries, re-run the test suite and add any new
+  # warning categories here rather than broadening the pattern.
+  "ignore::DeprecationWarning:transformers\\..*",
+  "ignore::FutureWarning:transformers\\..*",
+  "ignore::DeprecationWarning:huggingface_hub\\..*",
+  "ignore::FutureWarning:huggingface_hub\\..*",
+  "ignore::UserWarning:torch\\..*",
+  "ignore::FutureWarning:torch\\..*",
+  "ignore::DeprecationWarning:torch\\..*",
+  # diffusers / accelerate (optional i2v extras) follow the same pattern.
+  "ignore::DeprecationWarning:diffusers\\..*",
+  "ignore::FutureWarning:diffusers\\..*",
+  "ignore::DeprecationWarning:accelerate\\..*",
 ]
 
 [tool.ruff]
