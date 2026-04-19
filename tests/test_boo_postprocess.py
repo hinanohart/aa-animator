@@ -33,12 +33,9 @@ from aa_animator_v2._boo_postprocess import (
     CELL_H,
     CELL_W,
     FONT_RATIO,
-    _BLUE_TINT,
-    _OUTLINE_COLOR,
     apply_blue_glow,
     apply_outline_ring,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

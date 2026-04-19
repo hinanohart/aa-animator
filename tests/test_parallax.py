@@ -123,7 +123,7 @@ class TestFillHoles:
 class TestOrbitDisplacement:
     def test_frame_zero_dx_at_base_amp(self) -> None:
         # angle=0 → dx = amp * cos(0) = amp
-        dx, dy = orbit_displacement(0, 30, 18)
+        dx, _dy = orbit_displacement(0, 30, 18)
         assert pytest.approx(dx, abs=1e-5) == 18.0
 
     def test_frame_zero_dy_is_zero(self) -> None:

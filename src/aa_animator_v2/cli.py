@@ -147,7 +147,7 @@ def _cmd_animate(args: argparse.Namespace) -> int:
     if args.style == "bird":
         from aa_animator_v2.style_h_bird import generate_style_h
 
-        result = generate_style_h(
+        generate_style_h(
             input_path,
             output_path,
             cols=args.cols,
@@ -162,10 +162,7 @@ def _cmd_animate(args: argparse.Namespace) -> int:
         return 0
 
     # --mode overrides --style; --bg overrides --subject-only
-    if args.mode is not None:
-        mode = args.mode
-    else:
-        mode = "braille" if args.style == "braille" else "ascii"
+    mode = args.mode if args.mode is not None else "braille" if args.style == "braille" else "ascii"
     if args.bg is not None:
         bg: str = args.bg
     else:

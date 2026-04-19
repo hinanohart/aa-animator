@@ -62,7 +62,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
             return ImageFont.truetype(p, size)
-        except (OSError, IOError):
+        except OSError:
             continue
     return ImageFont.load_default()
 

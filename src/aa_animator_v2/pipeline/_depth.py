@@ -73,7 +73,7 @@ def estimate_depth(image: Image.Image, target_size: tuple[int, int]) -> np.ndarr
 
     # Cache key from image bytes
     img_bytes = np.array(image, dtype=np.uint8).tobytes()
-    cache_key = hashlib.md5(img_bytes, usedforsecurity=False).hexdigest()  # noqa: S324
+    cache_key = hashlib.md5(img_bytes, usedforsecurity=False).hexdigest()
     cache_dir = Path.home() / ".cache" / "aa_animator" / "depth"
     cache_path = cache_dir / f"{cache_key}.npy"
 

@@ -70,7 +70,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
             return ImageFont.truetype(p, size)
-        except (OSError, IOError):
+        except OSError:
             continue
     return ImageFont.load_default()
 
@@ -276,7 +276,7 @@ def generate_style_i(
         aa_frame = _render_density_aa(frame_rgb, cols, font)
 
         # Count '@' cells before post-processing (baseline)
-        arr_before = np.array(aa_frame)
+        np.array(aa_frame)
 
         # Post-processing: outline ring then blue glow
         aa_frame = apply_outline_ring(aa_frame, frame_rgb, cols, font)

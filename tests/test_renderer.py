@@ -121,7 +121,7 @@ class TestFontFallback:
     """Smoke test: _load_font must return a usable font object on any OS."""
 
     def test_load_font_returns_something(self) -> None:
-        from PIL import ImageFont  # noqa: PLC0415
+        from PIL import ImageFont
 
         font = _load_font(10)
         # Must be one of the two PIL font types (FreeType or default bitmap)

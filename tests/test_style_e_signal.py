@@ -22,7 +22,6 @@ Key invariants:
 from __future__ import annotations
 
 import copy
-import math
 
 import numpy as np
 import pytest
@@ -39,7 +38,6 @@ from aa_animator_v2.style_e_signal import (
     signal_scan,
     signal_wave,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -172,8 +170,9 @@ class TestRenderFrameInvariance:
         assert char_grid == original, "render_frame mutated char_grid"
 
     def test_render_frame_output_size(self, char_grid_and_brightness) -> None:
-        from aa_animator_v2.style_e_signal import _CELL_W, _CELL_H
         from PIL import ImageFont
+
+        from aa_animator_v2.style_e_signal import _CELL_H, _CELL_W
         char_grid, brightness = char_grid_and_brightness
         rows = len(char_grid)
         cols = len(char_grid[0])
@@ -184,8 +183,9 @@ class TestRenderFrameInvariance:
 
     def test_background_cells_not_lit(self, char_grid_and_brightness) -> None:
         """Space cells must stay BG color regardless of glow_mask."""
-        from aa_animator_v2.style_e_signal import _BG_COLOR, _GLOW_COLOR, _CELL_W, _CELL_H
         from PIL import ImageFont
+
+        from aa_animator_v2.style_e_signal import _CELL_H, _CELL_W
         char_grid, brightness = char_grid_and_brightness
         rows = len(char_grid)
         cols = len(char_grid[0])

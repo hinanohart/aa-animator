@@ -29,7 +29,6 @@ from __future__ import annotations
 
 import numpy as np
 from PIL import Image, ImageDraw
-
 from scipy.ndimage import sobel as scipy_sobel  # type: ignore[import-untyped]
 
 # ---------------------------------------------------------------------------

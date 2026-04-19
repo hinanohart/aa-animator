@@ -207,7 +207,7 @@ def compute_metrics(mp4_path: str | Path) -> dict:
         prev, curr = glyph_grids[i - 1], glyph_grids[i]
         n_cells = min(len(prev), len(curr))
         if n_cells > 0:
-            diff = sum(1 for a, b in zip(prev, curr) if a != b)
+            diff = sum(1 for a, b in zip(prev, curr, strict=False) if a != b)
             hamming_vals.append(diff / n_cells)
     hamming_mean = float(np.mean(hamming_vals)) if hamming_vals else 0.0
 

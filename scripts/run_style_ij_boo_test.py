@@ -33,9 +33,9 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
-from aa_animator_v2.style_i_long_boo import generate_style_i  # noqa: E402
-from aa_animator_v2.style_j_slime_boo import generate_style_j  # noqa: E402
-from aa_animator_v2.metrics_v02 import compute_metrics         # noqa: E402
+from aa_animator_v2.metrics_v02 import compute_metrics
+from aa_animator_v2.style_i_long_boo import generate_style_i
+from aa_animator_v2.style_j_slime_boo import generate_style_j
 
 # ---------------------------------------------------------------------------
 # Config

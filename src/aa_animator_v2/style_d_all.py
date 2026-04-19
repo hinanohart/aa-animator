@@ -27,9 +27,11 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-from scipy.ndimage import gaussian_filter  # type: ignore[import-untyped]
+from scipy.ndimage import (
+    binary_dilation,  # type: ignore[import-untyped]
+    gaussian_filter,  # type: ignore[import-untyped]
+)
 from scipy.ndimage import sobel as scipy_sobel  # type: ignore[import-untyped]
-from scipy.ndimage import binary_dilation  # type: ignore[import-untyped]
 
 # ---------------------------------------------------------------------------
 # Constants (unified)
@@ -68,7 +70,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
             return ImageFont.truetype(p, size)
-        except (OSError, IOError):
+        except OSError:
             continue
     return ImageFont.load_default()
 

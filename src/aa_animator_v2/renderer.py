@@ -72,7 +72,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
             return ImageFont.truetype(p, size)
-        except (OSError, IOError):
+        except OSError:
             continue
     return ImageFont.load_default()
 
@@ -128,7 +128,7 @@ def brightness_to_braille(brightness_01: float) -> str:
     Returns:
         A single Braille Unicode character.
     """
-    n_dots = int(round(brightness_01 * 8))
+    n_dots = round(brightness_01 * 8)
     bits = 0
     for i in range(n_dots):
         bits |= 1 << _BRAILLE_DOT_ORDER[i]

@@ -20,17 +20,18 @@ Selection rationale: Mode C is the only mode achieving flicker std <= 0.01,
 passes fg_entropy >= 3.0, and produces the smallest output size.
 """
 
+import argparse
+import math
+import os
+import subprocess
 import sys
 import time
-import math
-import subprocess
-import os
-import argparse
 from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-from scipy.ndimage import sobel as scipy_sobel, binary_dilation, uniform_filter
+from scipy.ndimage import binary_dilation, uniform_filter
+from scipy.ndimage import sobel as scipy_sobel
 
 # ── CLI ──────────────────────────────────────────────────────────────
 parser = argparse.ArgumentParser(description="aa-animator v0.0.3 PoC")
@@ -87,7 +88,7 @@ BRAILLE_BASE = 0x2800
 
 def brightness_to_braille(b01: float) -> str:
     """0-1 brightness → Braille character (8 dot, diagonal pattern)"""
-    n_dots = int(round(b01 * 8))
+    n_dots = round(b01 * 8)
     dot_order = [0, 3, 1, 4, 2, 5, 6, 7]
     bits = 0
     for i in range(n_dots):
@@ -573,7 +574,7 @@ def ok(v):
 
 
 print("\n" + "=" * 70)
-print(f"  aa-animator v0.0.3 — measured results")
+print("  aa-animator v0.0.3 — measured results")
 print("=" * 70)
 if BRAILLE_ON:
     win_tag = "C"

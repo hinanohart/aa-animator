@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from aa_animator_v2.dither import apply_bayer
 
