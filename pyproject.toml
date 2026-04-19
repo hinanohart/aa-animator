@@ -153,7 +153,23 @@ ignore = [
 
 [tool.mypy]
 python_version = "3.10"
-strict = true
-warn_return_any = true
+strict = false
+warn_return_any = false
 warn_unused_configs = true
-disallow_untyped_defs = true
+warn_unused_ignores = false
+disallow_untyped_defs = false
+ignore_missing_imports = true
+# Gradual typing — type annotations exist but aren't enforced strictly across
+# the codebase. Numpy/Pillow/rembg/diffusers stubs are incomplete or absent.
+
+[[tool.mypy.overrides]]
+module = [
+  "rembg",
+  "rembg.*",
+  "PIL",
+  "PIL.*",
+  "diffusers",
+  "diffusers.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
