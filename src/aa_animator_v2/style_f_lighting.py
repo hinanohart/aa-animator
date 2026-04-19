@@ -70,6 +70,7 @@ VALID_PATTERNS = (
 # Font loader
 # ---------------------------------------------------------------------------
 
+
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
@@ -87,6 +88,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Static base — built once, frame-invariant
 # ---------------------------------------------------------------------------
+
 
 def compute_base_brightness(
     image: Image.Image,
@@ -138,6 +140,7 @@ def _build_char_grid(
 # ---------------------------------------------------------------------------
 # Light-source position functions — return (Lx, Ly) in cell coordinates
 # ---------------------------------------------------------------------------
+
 
 def light_horizontal_sweep(t: float, rows: int, cols: int) -> tuple[float, float]:
     """Light sweeps left↔right sinusoidally at 0.5 Hz, y fixed at centre.
@@ -218,6 +221,7 @@ def light_lissajous(t: float, rows: int, cols: int) -> tuple[float, float]:
 # Intensity computation — pure float, no booleans
 # ---------------------------------------------------------------------------
 
+
 def compute_lit_intensity(
     base_brightness: np.ndarray,
     lx: float,
@@ -270,6 +274,7 @@ def compute_trail_intensity(
 # ---------------------------------------------------------------------------
 # Glyph quantisation — smooth re-quantise per frame
 # ---------------------------------------------------------------------------
+
 
 def quantize_to_glyph(lit_value: float, palette: str = _GHOSTTY_CHARS) -> str:
     """Map float intensity to a Ghostty palette character.
@@ -324,6 +329,7 @@ def _recompute_char_grid(
 # Color interpolation — continuous lerp, no boolean switch
 # ---------------------------------------------------------------------------
 
+
 def lerp_color(
     white: tuple[int, int, int],
     blue: tuple[int, int, int],
@@ -350,6 +356,7 @@ def lerp_color(
 # ---------------------------------------------------------------------------
 # Frame renderer — static cell positions, smooth per-frame colour
 # ---------------------------------------------------------------------------
+
 
 def render_frame(
     char_grid: list[list[str]],
@@ -386,6 +393,7 @@ def render_frame(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def generate_style_f(
     input_path: str | Path,
@@ -456,18 +464,34 @@ def generate_style_f(
 
     # Snapshot static grid for invariance check
     import copy
+
     char_grid_copy = copy.deepcopy(char_grid_static)
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(

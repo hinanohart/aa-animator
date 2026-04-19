@@ -70,8 +70,12 @@ def _build_parser() -> argparse.ArgumentParser:
     animate.add_argument("--cols", type=int, default=100, help="character canvas width")
     animate.add_argument("--fps", type=int, default=30)
     animate.add_argument("--duration", type=float, default=4.0, help="clip length in seconds")
-    animate.add_argument("--amp-deg", type=float, default=8.0, help="parallax orbit amplitude (degrees)")
-    animate.add_argument("--ema", type=float, default=0.3, help="temporal EMA smoothing coefficient")
+    animate.add_argument(
+        "--amp-deg", type=float, default=8.0, help="parallax orbit amplitude (degrees)"
+    )
+    animate.add_argument(
+        "--ema", type=float, default=0.3, help="temporal EMA smoothing coefficient"
+    )
     animate.add_argument("--glow", action=argparse.BooleanOptionalAction, default=True)
     animate.add_argument(
         "--depth-device",
@@ -112,7 +116,9 @@ def _build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     preview.add_argument("input", metavar="INPUT", help="path to input image")
-    preview.add_argument("--style", choices=["density", "edge", "block", "braille"], default="density")
+    preview.add_argument(
+        "--style", choices=["density", "edge", "block", "braille"], default="density"
+    )
     preview.add_argument(
         "--color",
         choices=["color", "mono", "matrix", "cyber", "amber", "gradient", "invert"],
@@ -141,7 +147,9 @@ def _cmd_animate(args: argparse.Namespace) -> int:
         print(f"[aa-animator] error: input not found: {input_path}", file=sys.stderr)
         return 1
 
-    output_path = Path(args.output) if args.output else input_path.with_name(input_path.stem + "_aa.mp4")
+    output_path = (
+        Path(args.output) if args.output else input_path.with_name(input_path.stem + "_aa.mp4")
+    )
 
     # Style H (bird) has its own render path — bypass AAAnimator
     if args.style == "bird":

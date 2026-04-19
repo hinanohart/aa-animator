@@ -62,6 +62,7 @@ VALID_SIGNALS = ("jump", "scan", "wave", "pulse", "combo")
 # Font loader
 # ---------------------------------------------------------------------------
 
+
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
@@ -79,6 +80,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Static base layer — built once, reused every frame
 # ---------------------------------------------------------------------------
+
 
 def render_static_base(
     image: Image.Image,
@@ -121,6 +123,7 @@ def render_static_base(
 # ---------------------------------------------------------------------------
 # Signal primitives — all return bool ndarray (rows, cols)
 # ---------------------------------------------------------------------------
+
 
 def signal_jump(t: float, rows: int, cols: int) -> np.ndarray:
     """Horizontal band oscillates vertically (2 Hz sine).
@@ -235,6 +238,7 @@ def signal_combo(t: float, rows: int, cols: int) -> np.ndarray:
 # Frame renderer — char_grid is static, glow_mask changes each frame
 # ---------------------------------------------------------------------------
 
+
 def render_frame(
     char_grid: list[list[str]],
     glow_mask: np.ndarray,
@@ -283,6 +287,7 @@ def render_frame(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def generate_style_e(
     input_path: str | Path,
@@ -340,19 +345,35 @@ def generate_style_e(
     # Validate char_grid invariance: build mask for first and last frame,
     # assert char_grid itself is unchanged
     import copy
+
     char_grid_copy = copy.deepcopy(char_grid)
 
     # Generate frames and stream to ffmpeg
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(
@@ -393,7 +414,9 @@ def generate_style_e(
     # pulse signal: animation is in alpha channel (pulse_alpha), not the bool mask
     # — all-True mask is correct by design, so skip mask-variation check for it
     if signal != "pulse":
-        assert mask_varied or n_frames <= 1, "glow_mask never varied across frames — signal not working"
+        assert mask_varied or n_frames <= 1, (
+            "glow_mask never varied across frames — signal not working"
+        )
 
     return {
         "output_path": str(output_path),

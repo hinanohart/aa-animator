@@ -63,14 +63,15 @@ _FONT_PATHS: list[str] = [
 VALID_PATTERNS = ("approach", "orbit_3d", "spiral", "pendulum_3d", "rim_light")
 
 # Lighting parameters
-_SIGMA: float = 10.0         # Gaussian falloff radius in cell units
+_SIGMA: float = 10.0  # Gaussian falloff radius in cell units
 _LIGHT_INTENSITY: float = 0.6
-_RIM_SIGMA: float = 4.0      # Smaller sigma for rim_light edge sharpness
+_RIM_SIGMA: float = 4.0  # Smaller sigma for rim_light edge sharpness
 
 
 # ---------------------------------------------------------------------------
 # Font loader
 # ---------------------------------------------------------------------------
+
 
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
@@ -89,6 +90,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Depth estimation — wraps pipeline._depth with cell-grid downsampling
 # ---------------------------------------------------------------------------
+
 
 def _estimate_depth_cell(
     image: Image.Image,
@@ -122,6 +124,7 @@ def _estimate_depth_cell(
 # Base brightness + depth — built once per image
 # ---------------------------------------------------------------------------
 
+
 def compute_base_brightness_and_depth(
     image: Image.Image,
     cols: int = 100,
@@ -152,6 +155,7 @@ def compute_base_brightness_and_depth(
 # Static char grid builder (uses base brightness quantised once)
 # ---------------------------------------------------------------------------
 
+
 def _build_char_grid(base: np.ndarray) -> list[list[str]]:
     """Build static char grid from base brightness.
 
@@ -178,6 +182,7 @@ def _build_char_grid(base: np.ndarray) -> list[list[str]]:
 # ---------------------------------------------------------------------------
 # 3D light source trajectory functions
 # ---------------------------------------------------------------------------
+
 
 def light_approach(
     t: float,
@@ -314,6 +319,7 @@ def light_rim_light(
 # Core 3D lighting computation
 # ---------------------------------------------------------------------------
 
+
 def compute_lit_intensity_3d(
     base: np.ndarray,
     depth_cell: np.ndarray,
@@ -367,6 +373,7 @@ def compute_lit_intensity_3d(
 # Glyph quantisation — frame-varying character based on lit intensity
 # ---------------------------------------------------------------------------
 
+
 def quantize_to_glyph(lit: np.ndarray, palette: str = _GHOSTTY_CHARS) -> list[list[str]]:
     """Re-quantise lit intensity into glyph characters each frame.
 
@@ -398,6 +405,7 @@ def quantize_to_glyph(lit: np.ndarray, palette: str = _GHOSTTY_CHARS) -> list[li
 # Color interpolation
 # ---------------------------------------------------------------------------
 
+
 def lerp_color(
     color_a: tuple[int, int, int],
     color_b: tuple[int, int, int],
@@ -424,6 +432,7 @@ def lerp_color(
 # ---------------------------------------------------------------------------
 # Frame renderer — static cell positions, dynamic chars and colors
 # ---------------------------------------------------------------------------
+
 
 def render_frame_g(
     char_grid: list[list[str]],
@@ -483,6 +492,7 @@ def _compute_color_grid(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def generate_style_g(
     input_path: str | Path,
@@ -549,15 +559,30 @@ def generate_style_g(
 
     # Generate frames and stream to ffmpeg
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(
@@ -580,7 +605,11 @@ def generate_style_g(
 
         lx, ly, lz = light_fn(t)
         lit = compute_lit_intensity_3d(
-            base, depth_cell, lx, ly, lz,
+            base,
+            depth_cell,
+            lx,
+            ly,
+            lz,
             sigma=sigma,
             intensity=_LIGHT_INTENSITY,
             z_scale=z_scale,

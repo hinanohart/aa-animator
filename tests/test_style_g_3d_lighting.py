@@ -47,6 +47,7 @@ from aa_animator_v2.style_g_3d_lighting import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def tiny_image() -> Image.Image:
     """20×10 RGB test image with a bright subject region."""
@@ -64,6 +65,7 @@ def base_and_depth(tiny_image: Image.Image):
 # ---------------------------------------------------------------------------
 # depth shape
 # ---------------------------------------------------------------------------
+
 
 class TestDepthShape:
     def test_depth_cell_shape(self, tiny_image: Image.Image) -> None:
@@ -94,21 +96,29 @@ class TestDepthShape:
 # lit intensity smoothness
 # ---------------------------------------------------------------------------
 
+
 class TestLitSmoothness:
     ROWS, COLS = 10, 20
 
     def _make_base_depth(self):
-        base = np.random.default_rng(42).uniform(0.1, 0.9, (self.ROWS, self.COLS)).astype(np.float32)
-        depth = np.random.default_rng(7).uniform(0.0, 1.0, (self.ROWS, self.COLS)).astype(np.float32)
+        base = (
+            np.random.default_rng(42).uniform(0.1, 0.9, (self.ROWS, self.COLS)).astype(np.float32)
+        )
+        depth = (
+            np.random.default_rng(7).uniform(0.0, 1.0, (self.ROWS, self.COLS)).astype(np.float32)
+        )
         return base, depth
 
-    @pytest.mark.parametrize("pattern_fn,kwargs", [
-        (light_approach, {}),
-        (light_orbit_3d, {}),
-        (light_spiral, {}),
-        (light_pendulum_3d, {}),
-        (light_rim_light, {}),
-    ])
+    @pytest.mark.parametrize(
+        "pattern_fn,kwargs",
+        [
+            (light_approach, {}),
+            (light_orbit_3d, {}),
+            (light_spiral, {}),
+            (light_pendulum_3d, {}),
+            (light_rim_light, {}),
+        ],
+    )
     def test_frame_to_frame_smoothness(self, pattern_fn, kwargs) -> None:
         """Max per-cell intensity delta between consecutive frames < 0.1."""
         base, depth = self._make_base_depth()
@@ -121,7 +131,11 @@ class TestLitSmoothness:
             t = i / fps
             lx, ly, lz = pattern_fn(t, self.ROWS, self.COLS, **kwargs)
             lit = compute_lit_intensity_3d(
-                base, depth, lx, ly, lz,
+                base,
+                depth,
+                lx,
+                ly,
+                lz,
                 sigma=sigma,
                 intensity=0.6,
                 z_scale=z_scale,
@@ -129,8 +143,7 @@ class TestLitSmoothness:
             if prev_lit is not None:
                 delta = float(np.abs(lit - prev_lit).max())
                 assert delta < 0.1, (
-                    f"{pattern_fn.__name__}: max frame delta {delta:.4f} ≥ 0.1 "
-                    f"at frame {i}"
+                    f"{pattern_fn.__name__}: max frame delta {delta:.4f} ≥ 0.1 at frame {i}"
                 )
             prev_lit = lit
 
@@ -138,6 +151,7 @@ class TestLitSmoothness:
 # ---------------------------------------------------------------------------
 # rim_light: background cells (high depth) are brighter when Lz=0.9
 # ---------------------------------------------------------------------------
+
 
 class TestRimLightDepthEffect:
     def test_rim_light_bright_on_far_cells(self) -> None:
@@ -171,14 +185,12 @@ class TestRimLightDepthEffect:
 # approach: Lz decreases over time
 # ---------------------------------------------------------------------------
 
+
 class TestApproachPattern:
     def test_lz_decreases(self) -> None:
         """Lz from approach must decrease as t increases (light moves closer)."""
         rows, cols = 41, 100
-        lz_values = [
-            light_approach(t, rows, cols)[2]
-            for t in [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
-        ]
+        lz_values = [light_approach(t, rows, cols)[2] for t in [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0]]
         # Not necessarily monotone every step (loops), but overall trend from
         # start: Lz(0)=0.9 down to Lz(3.0)=0.9-0.9*(3*0.3%1) — verify
         # the function returns decreasing values in the first half-period.
@@ -186,7 +198,7 @@ class TestApproachPattern:
         for i in range(len(first_half) - 1):
             assert first_half[i] >= first_half[i + 1] - 1e-6, (
                 f"approach Lz should decrease: Lz[{i}]={first_half[i]:.3f} "
-                f"Lz[{i+1}]={first_half[i+1]:.3f}"
+                f"Lz[{i + 1}]={first_half[i + 1]:.3f}"
             )
 
     def test_lz_initial_value(self) -> None:
@@ -198,6 +210,7 @@ class TestApproachPattern:
 # ---------------------------------------------------------------------------
 # boolean on/off prohibited: intensity must have ≥ 3 unique float values
 # ---------------------------------------------------------------------------
+
 
 class TestNoBooleanOnOff:
     def test_orbit_3d_intensity_not_binary(self) -> None:
@@ -213,9 +226,7 @@ class TestNoBooleanOnOff:
         for i in range(0, 120, 10):
             t = i / fps
             lx, ly, lz = light_orbit_3d(t, rows, cols)
-            lit = compute_lit_intensity_3d(
-                base, depth, lx, ly, lz, sigma=sigma, z_scale=z_scale
-            )
+            lit = compute_lit_intensity_3d(base, depth, lx, ly, lz, sigma=sigma, z_scale=z_scale)
             intensities.append(round(float(lit.mean()), 4))
 
         unique_count = len(set(intensities))
@@ -229,6 +240,7 @@ class TestNoBooleanOnOff:
 # quantize_to_glyph
 # ---------------------------------------------------------------------------
 
+
 class TestQuantizeToGlyph:
     def test_shape(self) -> None:
         lit = np.random.default_rng(0).uniform(0.0, 1.0, (10, 20)).astype(np.float32)
@@ -238,6 +250,7 @@ class TestQuantizeToGlyph:
 
     def test_chars_in_palette(self) -> None:
         from aa_animator_v2.style_g_3d_lighting import _GHOSTTY_CHARS
+
         lit = np.random.default_rng(1).uniform(0.0, 1.0, (10, 20)).astype(np.float32)
         grid = quantize_to_glyph(lit)
         for row in grid:
@@ -256,6 +269,7 @@ class TestQuantizeToGlyph:
 # ---------------------------------------------------------------------------
 # lerp_color
 # ---------------------------------------------------------------------------
+
 
 class TestLerpColor:
     def test_alpha_zero_gives_color_a(self) -> None:
@@ -284,11 +298,13 @@ class TestLerpColor:
 # render_frame_g
 # ---------------------------------------------------------------------------
 
+
 class TestRenderFrameG:
     def test_output_size(self) -> None:
         from PIL import ImageFont
 
         from aa_animator_v2.style_g_3d_lighting import _CELL_H, _CELL_W
+
         rows, cols = 5, 10
         char_grid = [["@"] * cols for _ in range(rows)]
         color_grid = [[(215, 215, 215)] * cols for _ in range(rows)]
@@ -301,6 +317,7 @@ class TestRenderFrameG:
         from PIL import ImageFont
 
         from aa_animator_v2.style_g_3d_lighting import _BG_COLOR
+
         rows, cols = 3, 3
         char_grid = [[" "] * cols for _ in range(rows)]
         color_grid = [[(255, 0, 0)] * cols for _ in range(rows)]
@@ -320,15 +337,15 @@ class TestRenderFrameG:
 # VALID_PATTERNS completeness
 # ---------------------------------------------------------------------------
 
+
 def test_valid_patterns_count() -> None:
-    assert set(VALID_PATTERNS) == {
-        "approach", "orbit_3d", "spiral", "pendulum_3d", "rim_light"
-    }
+    assert set(VALID_PATTERNS) == {"approach", "orbit_3d", "spiral", "pendulum_3d", "rim_light"}
 
 
 # ---------------------------------------------------------------------------
 # compute_lit_intensity_3d — basic properties
 # ---------------------------------------------------------------------------
+
 
 class TestComputeLitIntensity3D:
     def test_output_shape(self) -> None:

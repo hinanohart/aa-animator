@@ -46,7 +46,7 @@ _BLUE_TINT_ALPHA: float = 0.45  # blend strength for blue glow
 
 # Outline ring colour and edge detection threshold
 _OUTLINE_COLOR: tuple[int, int, int] = (240, 240, 255)
-_EDGE_THRESHOLD: float = 0.18   # Sobel magnitude threshold for edge cells
+_EDGE_THRESHOLD: float = 0.18  # Sobel magnitude threshold for edge cells
 
 # Cell geometry — must match DensityAA geometry in style_i / style_j
 CELL_W: int = 7
@@ -62,6 +62,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Public: apply_outline_ring
 # ---------------------------------------------------------------------------
+
 
 def apply_outline_ring(
     rendered: Image.Image,
@@ -119,6 +120,7 @@ def apply_outline_ring(
 # ---------------------------------------------------------------------------
 # Public: apply_blue_glow
 # ---------------------------------------------------------------------------
+
 
 def apply_blue_glow(
     rendered: Image.Image,

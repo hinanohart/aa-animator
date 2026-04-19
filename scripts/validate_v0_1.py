@@ -69,6 +69,7 @@ MIN_NATURAL = 5
 
 # ── Image generation helpers ─────────────────────────────────────────────────
 
+
 def _make_synthetic_portrait(size: tuple[int, int] = (256, 256)) -> Image.Image:
     """Synthetic portrait: skin-tone gradient ellipse on dark bg."""
     w, h = size
@@ -106,9 +107,9 @@ def _make_synthetic_abstract(size: tuple[int, int] = (256, 256)) -> Image.Image:
     block = 32
     for y in range(0, h, block):
         for x in range(0, w, block):
-            patch = arr[y:y + block, x:x + block]
+            patch = arr[y : y + block, x : x + block]
             mean = patch.mean(axis=(0, 1)).astype(np.uint8)
-            arr[y:y + block, x:x + block] = mean
+            arr[y : y + block, x : x + block] = mean
     return Image.fromarray(arr)
 
 
@@ -120,6 +121,7 @@ SYNTHETIC_IMAGES: list[tuple[str, Image.Image]] = [
 
 
 # ── Core helpers ─────────────────────────────────────────────────────────────
+
 
 def _frame_to_charseq(pil_img: Image.Image) -> np.ndarray:
     g = np.array(pil_img.convert("L"), dtype=np.float32) / 255.0
@@ -146,13 +148,30 @@ def _t_ci_95(values: list[float]) -> tuple[float, float]:
     # t critical values for df = n-1 at 95% CI (two-sided)
     # Tabulated values for small n; scipy.stats.t.ppf is optional
     t_table = {
-        1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571,
-        6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228,
-        11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131,
-        16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086,
+        1: 12.706,
+        2: 4.303,
+        3: 3.182,
+        4: 2.776,
+        5: 2.571,
+        6: 2.447,
+        7: 2.365,
+        8: 2.306,
+        9: 2.262,
+        10: 2.228,
+        11: 2.201,
+        12: 2.179,
+        13: 2.160,
+        14: 2.145,
+        15: 2.131,
+        16: 2.120,
+        17: 2.110,
+        18: 2.101,
+        19: 2.093,
+        20: 2.086,
     }
     try:
         from scipy import stats as scipy_stats  # type: ignore[import-untyped]
+
         t_crit = float(scipy_stats.t.ppf(0.975, df=n - 1))
     except Exception:
         t_crit = t_table.get(n - 1, 2.0)
@@ -185,6 +204,7 @@ def run_image(image_name: str, pil_override: Image.Image | None = None) -> dict:
     mask_source = "otsu"
     try:
         from rembg import remove as _rembg_remove  # type: ignore[import-not-found]
+
         rgba = _rembg_remove(img_pil)
         alpha = np.array(rgba, dtype=np.float32)[:, :, 3]
         thresh = animator._otsu_threshold(alpha.astype(np.uint8))
@@ -267,8 +287,10 @@ for img_name in NATURAL_IMAGES:
 
 # Sanity-check minimum natural images
 if natural_count < MIN_NATURAL:
-    print(f"\nWARNING: only {natural_count} natural images found (min={MIN_NATURAL}). "
-          "Results are statistically weaker.")
+    print(
+        f"\nWARNING: only {natural_count} natural images found (min={MIN_NATURAL}). "
+        "Results are statistically weaker."
+    )
 
 # Top up with synthetic images until n >= MIN_N
 needed_synthetic = max(0, MIN_N - natural_count)

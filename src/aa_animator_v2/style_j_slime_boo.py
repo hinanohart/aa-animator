@@ -62,20 +62,20 @@ _FONT_PATHS: list[str] = [
 ]
 
 # Breathe (slime mass swing) tuning
-_BREATHE_FREQ: float = 2.0    # cycles per second
+_BREATHE_FREQ: float = 2.0  # cycles per second
 _BREATHE_X_AMP: float = 0.08
 _BREATHE_Y_AMP: float = 0.10
 
 # Blink tuning — ported from aa_animator.py:317-324 _blink_curve concept
 _BLINK_TIMINGS: list[float] = [0.18, 0.50, 0.82]  # normalised t for blink peaks
-_BLINK_HALF_WIDTH: float = 0.04   # half-width of blink window in normalised t
-_BLINK_DARKEN: float = 0.25       # factor: eye region brightness during blink (0=black, 1=unchanged)
+_BLINK_HALF_WIDTH: float = 0.04  # half-width of blink window in normalised t
+_BLINK_DARKEN: float = 0.25  # factor: eye region brightness during blink (0=black, 1=unchanged)
 
 # Eye region: upper quarter of canvas, centre third horizontally
-_EYE_REGION_TOP: float = 0.15     # start row fraction
-_EYE_REGION_BOT: float = 0.42     # end row fraction
-_EYE_REGION_LEFT: float = 0.25    # start col fraction
-_EYE_REGION_RIGHT: float = 0.75   # end col fraction
+_EYE_REGION_TOP: float = 0.15  # start row fraction
+_EYE_REGION_BOT: float = 0.42  # end row fraction
+_EYE_REGION_LEFT: float = 0.25  # start col fraction
+_EYE_REGION_RIGHT: float = 0.75  # end col fraction
 
 
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -94,6 +94,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Blink curve (aa_animator.py:317-324 _blink_curve port)
 # ---------------------------------------------------------------------------
+
 
 def _blink_intensity(t: float) -> float:
     """Return blink darkening intensity in [0, 1] at normalised time t.
@@ -121,6 +122,7 @@ def _blink_intensity(t: float) -> float:
 # ---------------------------------------------------------------------------
 # Motion: breathe (slime dance)
 # ---------------------------------------------------------------------------
+
 
 def _apply_breathe(
     img: Image.Image,
@@ -162,6 +164,7 @@ def _apply_breathe(
 # ---------------------------------------------------------------------------
 # Blink post-process (cell-level threshold modulation)
 # ---------------------------------------------------------------------------
+
 
 def _apply_blink(
     rendered: Image.Image,
@@ -218,6 +221,7 @@ def _apply_blink(
 # DensityAA renderer
 # ---------------------------------------------------------------------------
 
+
 def _render_density_aa(
     frame_img: Image.Image,
     cols: int,
@@ -269,6 +273,7 @@ def _render_density_aa(
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def generate_style_j(
     input_path: str | Path,
     output_path: str | Path,
@@ -317,15 +322,30 @@ def generate_style_j(
     rows = max(1, int(canvas_size * cols / canvas_size * FONT_RATIO))
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{out_w}x{out_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{out_w}x{out_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(

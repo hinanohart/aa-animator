@@ -82,6 +82,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # Shape codebook: 64 chars from Ghostty palette + density extension
 # ---------------------------------------------------------------------------
 
+
 def _build_shape_codebook() -> tuple[list[str], np.ndarray]:
     """Build 64-character codebook from Ghostty palette with 6D feature vectors.
 
@@ -103,8 +104,8 @@ def _build_shape_codebook() -> tuple[list[str], np.ndarray]:
     # 6D feature: (lum_proxy, 0, 0, 0, 0, density_proxy)
     # This allows KD-tree to prefer chars by luminance proximity
     codebook = np.zeros((64, _FEATURE_DIM), dtype=np.float32)
-    codebook[:, 0] = densities   # lum
-    codebook[:, 5] = densities   # sobel proxy (darker char → less edge weight)
+    codebook[:, 0] = densities  # lum
+    codebook[:, 5] = densities  # sobel proxy (darker char → less edge weight)
 
     return chars, codebook
 
@@ -116,6 +117,7 @@ _KDTREE = cKDTree(_CODEBOOK_VECS)
 # ---------------------------------------------------------------------------
 # Frame motion (breathe + bob, same as Style A)
 # ---------------------------------------------------------------------------
+
 
 def _apply_effects(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
     """Apply breathe + bob effects (identical to style_a_gallery)."""
@@ -143,6 +145,7 @@ def _apply_effects(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
 
     if abs(bright - 1.0) > 0.01:
         from PIL import ImageEnhance
+
         rgb = ImageEnhance.Brightness(rgb).enhance(bright)
 
     return rgb
@@ -151,6 +154,7 @@ def _apply_effects(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
 # ---------------------------------------------------------------------------
 # DoG edge detection
 # ---------------------------------------------------------------------------
+
 
 def _dog_edge(gray: np.ndarray, sigma1: float = 1.0, sigma2: float = 1.6) -> np.ndarray:
     """Difference of Gaussians edge map normalised to [0, 1].
@@ -197,6 +201,7 @@ def _sobel_direction_glyph(dx: float, dy: float) -> str:
 # DoG + 6D shape render
 # ---------------------------------------------------------------------------
 
+
 def _render_dog_shape(
     frame_img: Image.Image,
     cols: int,
@@ -234,14 +239,21 @@ def _render_dog_shape(
     edge_mask = (dog > _DOG_THRESH) & (sobel_norm > _SOBEL_FRACTION * sobel_norm.max() + 1e-8)
 
     # 6D feature per cell for body chars
-    feat = np.stack([
-        lum,
-        arr_01[..., 0],
-        arr_01[..., 1],
-        arr_01[..., 2],
-        dog,
-        sobel_norm,
-    ], axis=-1).reshape(-1, _FEATURE_DIM).astype(np.float32)  # (rows*cols, 6)
+    feat = (
+        np.stack(
+            [
+                lum,
+                arr_01[..., 0],
+                arr_01[..., 1],
+                arr_01[..., 2],
+                dog,
+                sobel_norm,
+            ],
+            axis=-1,
+        )
+        .reshape(-1, _FEATURE_DIM)
+        .astype(np.float32)
+    )  # (rows*cols, 6)
 
     _, nn_idx = _KDTREE.query(feat)  # (rows*cols,)
     nn_idx = nn_idx.reshape(rows, cols)
@@ -283,6 +295,7 @@ def _render_dog_shape(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def generate_style_c(
     input_path: str | Path,
@@ -334,20 +347,37 @@ def generate_style_c(
         frames.append(aa_frame)
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(
-        cmd, stdin=subprocess.PIPE,
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
     assert proc.stdin is not None
     for frame in frames:
