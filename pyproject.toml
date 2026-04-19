@@ -46,7 +46,7 @@ dependencies = [
   "rembg>=2.0",
   "onnxruntime>=1.15",
   "torch>=2.1",
-  "transformers>=4.40",
+  "transformers>=4.53.0",  # CVE-2025-5197 (ReDoS) / CVE-2025-3777 fix floor
   "huggingface-hub>=0.24",
   "tqdm",
 ]
