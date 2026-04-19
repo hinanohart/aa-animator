@@ -632,6 +632,10 @@ def generate_style_g(
     proc.stdin.close()
     proc.wait()
 
+    if proc.returncode != 0:
+        stderr = proc.stderr.read().decode(errors="replace")
+        raise RuntimeError(f"ffmpeg failed (rc={proc.returncode}):\n{stderr[-400:]}")
+
     # Assert no boolean on/off: sampled cell intensities must span ≥ 3 unique
     # float values (rounded to 2 decimals to tolerate float noise).
     unique_rounded = len(set(round(v, 2) for v in sampled_cell_values))

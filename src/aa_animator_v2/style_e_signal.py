@@ -409,6 +409,10 @@ def generate_style_e(
     proc.stdin.close()
     proc.wait()
 
+    if proc.returncode != 0:
+        stderr = proc.stderr.read().decode(errors="replace")
+        raise RuntimeError(f"ffmpeg failed (rc={proc.returncode}):\n{stderr[-400:]}")
+
     # Assert char_grid was never mutated
     assert char_grid == char_grid_copy, "char_grid was mutated between frames — invariant violated"
     # pulse signal: animation is in alpha channel (pulse_alpha), not the bool mask

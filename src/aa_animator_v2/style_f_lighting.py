@@ -536,6 +536,10 @@ def generate_style_f(
     proc.stdin.close()
     proc.wait()
 
+    if proc.returncode != 0:
+        stderr = proc.stderr.read().decode(errors="replace")
+        raise RuntimeError(f"ffmpeg failed (rc={proc.returncode}):\n{stderr[-400:]}")
+
     # Invariance check — static grid must not have been mutated
     assert char_grid_static == char_grid_copy, "char_grid_static was mutated — invariant violated"
 
