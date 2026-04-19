@@ -29,7 +29,6 @@ import math
 
 import numpy as np
 
-
 # ---------------------------------------------------------------------------
 # Dynamic amplitude
 # ---------------------------------------------------------------------------
@@ -49,7 +48,7 @@ def dynamic_amp_px(fg_coverage: float) -> int:
     """
     cov = max(0.05, min(1.0, fg_coverage))
     amp = _BASE_AMP_PX * max(0.1, min(1.0, _COVERAGE_REF / cov))
-    return int(round(amp))
+    return round(amp)
 
 
 # ---------------------------------------------------------------------------

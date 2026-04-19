@@ -26,7 +26,6 @@ Key invariants verified:
 from __future__ import annotations
 
 import math
-from pathlib import Path
 
 import numpy as np
 import pytest
@@ -38,7 +37,6 @@ from aa_animator_v2.style_h_bird import (
     _load_font,
     _render_block_aa,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

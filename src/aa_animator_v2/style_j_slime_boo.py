@@ -37,7 +37,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageEnhance, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 from aa_animator_v2._boo_postprocess import (
     CELL_H,
@@ -82,7 +82,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
             return ImageFont.truetype(p, size)
-        except (OSError, IOError):
+        except OSError:
             continue
     return ImageFont.load_default()
 

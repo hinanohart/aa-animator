@@ -43,7 +43,6 @@ from aa_animator_v2.style_g_3d_lighting import (
     render_frame_g,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -287,8 +286,9 @@ class TestLerpColor:
 
 class TestRenderFrameG:
     def test_output_size(self) -> None:
-        from aa_animator_v2.style_g_3d_lighting import _CELL_W, _CELL_H
         from PIL import ImageFont
+
+        from aa_animator_v2.style_g_3d_lighting import _CELL_H, _CELL_W
         rows, cols = 5, 10
         char_grid = [["@"] * cols for _ in range(rows)]
         color_grid = [[(215, 215, 215)] * cols for _ in range(rows)]
@@ -298,8 +298,9 @@ class TestRenderFrameG:
 
     def test_space_cells_not_drawn(self) -> None:
         """Space cells must remain background color."""
-        from aa_animator_v2.style_g_3d_lighting import _BG_COLOR, _CELL_W, _CELL_H
         from PIL import ImageFont
+
+        from aa_animator_v2.style_g_3d_lighting import _BG_COLOR
         rows, cols = 3, 3
         char_grid = [[" "] * cols for _ in range(rows)]
         color_grid = [[(255, 0, 0)] * cols for _ in range(rows)]
@@ -353,8 +354,8 @@ class TestComputeLitIntensity3D:
         lx, ly, lz = 5.0, 3.0, 0.5  # light at specific position
         lit = compute_lit_intensity_3d(base, depth, lx, ly, lz, sigma=3.0, z_scale=5.0)
         # Nearest cell
-        r_near = int(round(ly))
-        c_near = int(round(lx))
+        r_near = round(ly)
+        c_near = round(lx)
         center_val = lit[r_near, c_near]
         assert center_val >= lit.mean() * 1.5, (
             f"Cell nearest to light ({center_val:.3f}) should exceed mean ({lit.mean():.3f})"

@@ -69,7 +69,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
             return ImageFont.truetype(p, size)
-        except (OSError, IOError):
+        except OSError:
             continue
     return ImageFont.load_default()
 
@@ -228,10 +228,7 @@ def _render_dog_shape(
     sy = scipy_sobel(lum, axis=0)
     sobel_mag = np.hypot(sx, sy)
     sobel_max = sobel_mag.max()
-    if sobel_max > 0:
-        sobel_norm = sobel_mag / sobel_max
-    else:
-        sobel_norm = sobel_mag
+    sobel_norm = sobel_mag / sobel_max if sobel_max > 0 else sobel_mag
 
     # Edge decision (architect spec)
     edge_mask = (dog > _DOG_THRESH) & (sobel_norm > _SOBEL_FRACTION * sobel_norm.max() + 1e-8)

@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 import time
@@ -34,7 +33,7 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
-from aa_animator_v2.style_e_signal import generate_style_e, VALID_SIGNALS  # noqa: E402
+from aa_animator_v2.style_e_signal import VALID_SIGNALS, generate_style_e
 
 # ---------------------------------------------------------------------------
 # Config
@@ -152,11 +151,11 @@ def main() -> None:
                     rec["discord"] = ok
                     if ok:
                         discord_ok += 1
-                        print(f"  [discord] sent")
+                        print("  [discord] sent")
                     else:
                         discord_fail += 1
                 else:
-                    print(f"  [discord] dry-run, skipped")
+                    print("  [discord] dry-run, skipped")
 
                 results.append(rec)
 
@@ -177,7 +176,7 @@ def main() -> None:
     print(f"\nResults: {results_path}")
 
     ok_count = sum(1 for r in results if "error" not in r)
-    fail_count = len(results) - ok_count
+    len(results) - ok_count
     print(f"Generated: {ok_count}/{len(results)} MP4s")
     if not args.dry_run:
         print(f"Discord:   {discord_ok} sent, {discord_fail} failed")

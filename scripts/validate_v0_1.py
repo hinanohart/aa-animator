@@ -272,8 +272,7 @@ if natural_count < MIN_NATURAL:
 
 # Top up with synthetic images until n >= MIN_N
 needed_synthetic = max(0, MIN_N - natural_count)
-if needed_synthetic > len(SYNTHETIC_IMAGES):
-    needed_synthetic = len(SYNTHETIC_IMAGES)
+needed_synthetic = min(needed_synthetic, len(SYNTHETIC_IMAGES))
 
 for syn_name, syn_img in SYNTHETIC_IMAGES[:needed_synthetic]:
     print(f"\nProcessing [synthetic]: {syn_name} ...")

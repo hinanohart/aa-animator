@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 import time
@@ -35,11 +34,11 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
+from aa_animator_v2.metrics_v02 import compute_metrics
 from aa_animator_v2.style_a_gallery import generate_style_a
 from aa_animator_v2.style_b_boo_inspired import generate_style_b
 from aa_animator_v2.style_c_dog_shape import generate_style_c
 from aa_animator_v2.style_d_all import generate_style_d
-from aa_animator_v2.metrics_v02 import compute_metrics
 
 # ---------------------------------------------------------------------------
 # Config
@@ -129,7 +128,7 @@ def main() -> int:
     discord_failed: int = 0
 
     print(f"[runner] output dir: {_OUT_DIR}", file=sys.stderr)
-    print(f"[runner] generating 3 images × 4 styles = up to 12 MP4s", file=sys.stderr)
+    print("[runner] generating 3 images × 4 styles = up to 12 MP4s", file=sys.stderr)
 
     for style_id, style_label in _STYLES:
         gen_fn = _GENERATORS[style_id]

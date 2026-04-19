@@ -25,8 +25,6 @@ Key invariants verified:
 
 from __future__ import annotations
 
-import math
-
 import numpy as np
 import pytest
 from PIL import Image, ImageDraw, ImageFont
@@ -40,7 +38,6 @@ from aa_animator_v2.style_i_long_boo import (
     _apply_vignette,
     _render_density_aa,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 import time
@@ -34,7 +33,7 @@ from pathlib import Path
 _REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO / "src"))
 
-from aa_animator_v2.style_f_lighting import generate_style_f, VALID_PATTERNS  # noqa: E402
+from aa_animator_v2.style_f_lighting import VALID_PATTERNS, generate_style_f
 
 # ---------------------------------------------------------------------------
 # Config

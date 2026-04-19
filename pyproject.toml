@@ -134,10 +134,22 @@ ignore = [
   "S101",    # asserts in tests
   "PLR0912", # branches in rendering code
   "PLR2004", # magic numbers in render constants
+  "PLR0913", # too-many-arguments (pipeline stages legitimately take many knobs)
+  "PLR0915", # too-many-statements (rendering/encoding orchestration)
+  "PLC0415", # lazy imports inside functions (used for optional deps: rembg, torch, scipy)
+  "RUF001",  # ambiguous Unicode strings (emoji/typography used in AA rendering intentionally)
+  "RUF002",  # ambiguous Unicode in docstrings (Japanese/emoji in prose)
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "PLR2004"]
+"tests/*" = ["S101", "PLR2004", "E501", "RUF003"]
+"scripts/*" = ["S108", "S603", "PLW1510", "E501", "E402", "B007", "S110", "S112"]
+"src/aa_animator_v2/style_*.py" = ["E501", "S603", "PLW1510", "RUF003"]
+"src/aa_animator_v2/renderer.py" = ["E501", "RUF003", "PLR0911"]
+"src/aa_animator_v2/metrics_v02.py" = ["E501", "S603", "PLW1510", "S112"]
+"src/aa_animator_v2/cli.py" = ["E501", "S603", "PLW1510", "B007", "S112", "S110"]
+"src/aa_animator_v2/dither.py" = ["RUF003"]
+"src/aa_animator_v2/pipeline/_encoding.py" = ["S603", "PLW1510"]
 
 [tool.mypy]
 python_version = "3.10"

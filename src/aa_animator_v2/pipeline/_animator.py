@@ -130,7 +130,7 @@ class AAAnimator:
             raise FileNotFoundError(f"Input image not found: {path}")
 
         # Derive canvas dimensions from cols
-        rows = int(round(self.cols * 0.41))  # ~100:41 aspect ratio
+        rows = round(self.cols * 0.41)  # ~100:41 aspect ratio
         self._rows = rows
         self._img_w = self.cols * self._cell_w
         self._img_h = rows * self._cell_h

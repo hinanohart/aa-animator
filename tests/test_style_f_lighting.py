@@ -23,7 +23,6 @@ Key invariants:
 
 from __future__ import annotations
 
-import copy
 import math
 
 import numpy as np
@@ -31,9 +30,9 @@ import pytest
 from PIL import Image
 
 from aa_animator_v2.style_f_lighting import (
-    VALID_PATTERNS,
     _GLOW_COLOR,
     _STATIC_COLOR,
+    VALID_PATTERNS,
     compute_base_brightness,
     compute_lit_intensity,
     lerp_color,
@@ -44,7 +43,6 @@ from aa_animator_v2.style_f_lighting import (
     quantize_to_glyph,
     render_frame,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -204,7 +202,7 @@ class TestLerpColor:
         assert result == _GLOW_COLOR
 
     def test_alpha_half_is_midpoint(self) -> None:
-        r, g, b = lerp_color(_STATIC_COLOR, _GLOW_COLOR, alpha=0.5)
+        r, g, _b = lerp_color(_STATIC_COLOR, _GLOW_COLOR, alpha=0.5)
         expected_r = int(_STATIC_COLOR[0] * 0.5 + _GLOW_COLOR[0] * 0.5)
         expected_g = int(_STATIC_COLOR[1] * 0.5 + _GLOW_COLOR[1] * 0.5)
         assert abs(r - expected_r) <= 1
@@ -240,8 +238,9 @@ class TestQuantizeToGlyph:
 class TestRenderFrame:
     def test_space_cells_stay_background(self, base_brightness: np.ndarray, tiny_image: Image.Image) -> None:
         """Space cells must remain background colour regardless of high lit_intensity."""
-        from aa_animator_v2.style_f_lighting import _BG_COLOR, _CELL_W, _CELL_H, _build_char_grid
         from PIL import ImageFont
+
+        from aa_animator_v2.style_f_lighting import _CELL_H, _CELL_W, _build_char_grid
         char_grid = _build_char_grid(base_brightness)
         # All cells lit at max intensity
         lit = np.ones_like(base_brightness)
@@ -260,8 +259,9 @@ class TestRenderFrame:
                     )
 
     def test_output_size(self, base_brightness: np.ndarray) -> None:
-        from aa_animator_v2.style_f_lighting import _CELL_W, _CELL_H, _build_char_grid
         from PIL import ImageFont
+
+        from aa_animator_v2.style_f_lighting import _CELL_H, _CELL_W, _build_char_grid
         char_grid = _build_char_grid(base_brightness)
         rows = len(char_grid)
         cols = len(char_grid[0])
