@@ -55,6 +55,7 @@ _SIGNALS: list[str] = list(VALID_SIGNALS)  # jump, scan, wave, pulse, combo
 # Discord sender (same pattern as run_v02_comparison.py)
 # ---------------------------------------------------------------------------
 
+
 def _send_discord(file_path: Path, label: str) -> bool:
     """Send a file to Discord via the local hook script.
 
@@ -83,6 +84,7 @@ def _send_discord(file_path: Path, label: str) -> bool:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Style E signal test runner")
@@ -162,13 +164,15 @@ def main() -> None:
             except Exception as exc:
                 elapsed = time.time() - t0
                 print(f"  FAIL  {exc}")
-                results.append({
-                    "output": str(out_path),
-                    "signal": sig,
-                    "image": img_name,
-                    "error": str(exc),
-                    "elapsed_s": round(elapsed, 2),
-                })
+                results.append(
+                    {
+                        "output": str(out_path),
+                        "signal": sig,
+                        "image": img_name,
+                        "error": str(exc),
+                        "elapsed_s": round(elapsed, 2),
+                    }
+                )
 
     # Write results JSON
     results_path = _OUT_DIR / "results.json"

@@ -77,11 +77,16 @@ def _sample_frames(mp4_path: Path, n_samples: int = 8) -> list[np.ndarray]:
 
     # Get frame count and dimensions
     probe_cmd = [
-        "ffprobe", "-v", "error",
-        "-select_streams", "v:0",
-        "-count_packets", "-show_entries",
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_packets",
+        "-show_entries",
         "stream=nb_read_packets,width,height",
-        "-of", "csv=p=0",
+        "-of",
+        "csv=p=0",
         str(mp4_path),
     ]
     try:
@@ -100,12 +105,19 @@ def _sample_frames(mp4_path: Path, n_samples: int = 8) -> list[np.ndarray]:
     step = max(1, total // n_samples)
     for frame_idx in range(0, min(total, n_samples * step), step):
         cmd = [
-            "ffmpeg", "-v", "error",
-            "-i", str(mp4_path),
-            "-vf", f"select=eq(n\\,{frame_idx})",
-            "-frames:v", "1",
-            "-f", "rawvideo",
-            "-pix_fmt", "rgb24",
+            "ffmpeg",
+            "-v",
+            "error",
+            "-i",
+            str(mp4_path),
+            "-vf",
+            f"select=eq(n\\,{frame_idx})",
+            "-frames:v",
+            "1",
+            "-f",
+            "rawvideo",
+            "-pix_fmt",
+            "rgb24",
             "pipe:1",
         ]
         try:
@@ -141,9 +153,12 @@ def _frame_to_glyph_grid(frame: np.ndarray, cell_w: int = 7, cell_h: int = 14) -
     glyphs = []
     for ry in range(rows):
         for cx in range(cols):
-            cell = frame[ry * cell_h:(ry + 1) * cell_h, cx * cell_w:(cx + 1) * cell_w]
-            lum = float(0.2126 * cell[:, :, 0].mean() + 0.7152 * cell[:, :, 1].mean()
-                        + 0.0722 * cell[:, :, 2].mean())
+            cell = frame[ry * cell_h : (ry + 1) * cell_h, cx * cell_w : (cx + 1) * cell_w]
+            lum = float(
+                0.2126 * cell[:, :, 0].mean()
+                + 0.7152 * cell[:, :, 1].mean()
+                + 0.0722 * cell[:, :, 2].mean()
+            )
             idx = int(np.clip(lum / 255.0 * n, 0, n))
             glyphs.append(charset[idx])
     return glyphs
@@ -185,6 +200,7 @@ def compute_metrics(mp4_path: str | Path) -> dict:
 
     total_cells = len(all_glyphs)
     from collections import Counter
+
     counts = Counter(all_glyphs)
 
     # Empirical distribution (collapse non-ghostty to 'other')

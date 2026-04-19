@@ -83,6 +83,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # Style B motion
 # ---------------------------------------------------------------------------
 
+
 def _apply_boo_motion(img: Image.Image, t: float, canvas_size: int) -> tuple[Image.Image, float]:
     freq_rad = t * math.pi * 2.0 * _MASS_SWING_FREQ
     scale_x = 1.0 + _MASS_X_AMP * math.sin(freq_rad)
@@ -111,6 +112,7 @@ def _apply_boo_motion(img: Image.Image, t: float, canvas_size: int) -> tuple[Ima
 # DoG helper
 # ---------------------------------------------------------------------------
 
+
 def _dog_edge(gray: np.ndarray, sigma1: float = 1.0, sigma2: float = 1.6) -> np.ndarray:
     g1 = gaussian_filter(gray, sigma=sigma1)
     g2 = gaussian_filter(gray, sigma=sigma2)
@@ -136,6 +138,7 @@ def _sobel_direction_glyph(dx: float, dy: float) -> str:
 # ---------------------------------------------------------------------------
 # Combined render: A body + C edge
 # ---------------------------------------------------------------------------
+
 
 def _render_combined(
     frame_img: Image.Image,
@@ -219,6 +222,7 @@ def _render_combined(
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def generate_style_d(
     input_path: str | Path,
     output_path: str | Path,
@@ -269,20 +273,37 @@ def generate_style_d(
         frames.append(aa_frame)
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(
-        cmd, stdin=subprocess.PIPE,
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
     assert proc.stdin is not None
     for frame in frames:

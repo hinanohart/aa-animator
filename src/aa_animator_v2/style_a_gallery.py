@@ -68,6 +68,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # Frame motion effects (breathe + bob + pulse from aa_animator.py:209-234)
 # ---------------------------------------------------------------------------
 
+
 def _apply_effects(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
     """Apply breathe + bob + pulse effects to a PIL RGBA image.
 
@@ -114,6 +115,7 @@ def _apply_effects(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
 
     if abs(bright - 1.0) > 0.01:
         from PIL import ImageEnhance  # type: ignore
+
         rgb = ImageEnhance.Brightness(rgb).enhance(bright)
 
     return rgb
@@ -122,6 +124,7 @@ def _apply_effects(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
 # ---------------------------------------------------------------------------
 # DensityAA render (ported from aa_animator.py:383-416)
 # ---------------------------------------------------------------------------
+
 
 def _render_density_aa(
     frame_img: Image.Image,
@@ -193,7 +196,9 @@ def _apply_edge_glow(
 
     w, h = frame_img.size
     rows = max(1, int(h * cols / w * _FONT_RATIO))
-    small_gray = np.array(frame_img.convert("L").resize((cols, rows), Image.LANCZOS)).astype(np.float32)
+    small_gray = np.array(frame_img.convert("L").resize((cols, rows), Image.LANCZOS)).astype(
+        np.float32
+    )
 
     sx = scipy_sobel(small_gray, axis=1)
     sy = scipy_sobel(small_gray, axis=0)
@@ -214,7 +219,9 @@ def _apply_edge_glow(
             y0, y1 = ry * _CELL_H, (ry + 1) * _CELL_H
             x0, x1 = cx * _CELL_W, (cx + 1) * _CELL_W
             region = canvas_arr[y0:y1, x0:x1]
-            region[:] = region * (1.0 - _GLOW_ALPHA) + np.array(_GLOW_COLOR, dtype=np.float32) * _GLOW_ALPHA
+            region[:] = (
+                region * (1.0 - _GLOW_ALPHA) + np.array(_GLOW_COLOR, dtype=np.float32) * _GLOW_ALPHA
+            )
 
     return Image.fromarray(np.clip(canvas_arr, 0, 255).astype(np.uint8))
 
@@ -222,6 +229,7 @@ def _apply_edge_glow(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def generate_style_a(
     input_path: str | Path,
@@ -276,20 +284,37 @@ def generate_style_a(
 
     # Export via ffmpeg
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(
-        cmd, stdin=subprocess.PIPE,
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
     assert proc.stdin is not None
     for frame in frames:

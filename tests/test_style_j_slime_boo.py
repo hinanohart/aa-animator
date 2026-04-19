@@ -47,6 +47,7 @@ from aa_animator_v2.style_j_slime_boo import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def subject_rgba() -> Image.Image:
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
@@ -73,6 +74,7 @@ def font():
 # Blink timings
 # ---------------------------------------------------------------------------
 
+
 def test_blink_timings_exact():
     assert _BLINK_TIMINGS == [0.18, 0.50, 0.82]
 
@@ -84,6 +86,7 @@ def test_blink_timings_count():
 # ---------------------------------------------------------------------------
 # _blink_intensity
 # ---------------------------------------------------------------------------
+
 
 class TestBlinkIntensity:
     @pytest.mark.parametrize("bt", [0.18, 0.50, 0.82])
@@ -115,6 +118,7 @@ class TestBlinkIntensity:
 # ---------------------------------------------------------------------------
 # _apply_blink
 # ---------------------------------------------------------------------------
+
 
 class TestApplyBlink:
     def _make_rendered(self, cols: int) -> tuple[Image.Image, int]:
@@ -184,6 +188,7 @@ class TestApplyBlink:
 # _apply_breathe
 # ---------------------------------------------------------------------------
 
+
 class TestApplyBreathe:
     def test_output_is_rgb_canvas_size(self, subject_rgba):
         canvas_size = 128
@@ -212,6 +217,7 @@ class TestApplyBreathe:
 # _render_density_aa (style_j local copy)
 # ---------------------------------------------------------------------------
 
+
 class TestRenderDensityAAJ:
     def test_output_width_is_cols_times_cell_w(self, small_rgb, font):
         cols = 8
@@ -237,6 +243,7 @@ class TestRenderDensityAAJ:
 # Fixed grid assertion: cell positions invariant across breathe frames
 # ---------------------------------------------------------------------------
 
+
 def test_cell_grid_positions_fixed_across_frames():
     """Cell output pixel dimensions must not change between frames (fixed grid).
 
@@ -259,6 +266,4 @@ def test_cell_grid_positions_fixed_across_frames():
         sizes.append(aa.size)
 
     # All frames must have the same output size
-    assert len(set(sizes)) == 1, (
-        f"Cell grid size changed across frames (not fixed): {set(sizes)}"
-    )
+    assert len(set(sizes)) == 1, f"Cell grid size changed across frames (not fixed): {set(sizes)}"

@@ -43,12 +43,14 @@ from aa_animator_v2.style_e_signal import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def tiny_image() -> Image.Image:
     """20×10 RGB test image with visible foreground pixels."""
     img = Image.new("RGB", (20, 10), (8, 8, 12))
     # Draw a bright rectangle in the centre so luma > 6 cells exist
     from PIL import ImageDraw
+
     d = ImageDraw.Draw(img)
     d.rectangle([5, 2, 15, 8], fill=(200, 200, 200))
     return img
@@ -62,6 +64,7 @@ def char_grid_and_brightness(tiny_image: Image.Image):
 # ---------------------------------------------------------------------------
 # render_static_base
 # ---------------------------------------------------------------------------
+
 
 class TestRenderStaticBase:
     def test_shape(self, tiny_image: Image.Image) -> None:
@@ -90,6 +93,7 @@ class TestRenderStaticBase:
 # ---------------------------------------------------------------------------
 # Signal primitives — shape and type
 # ---------------------------------------------------------------------------
+
 
 class TestSignalShapes:
     ROWS, COLS = 10, 20
@@ -122,6 +126,7 @@ class TestSignalShapes:
 # ---------------------------------------------------------------------------
 # Signal dynamics — mask must vary across time
 # ---------------------------------------------------------------------------
+
 
 class TestSignalDynamics:
     ROWS, COLS = 41, 100
@@ -156,10 +161,14 @@ class TestSignalDynamics:
 # render_frame — char_grid invariance
 # ---------------------------------------------------------------------------
 
+
 class TestRenderFrameInvariance:
-    def test_char_grid_not_mutated_by_render(self, char_grid_and_brightness, tiny_image: Image.Image) -> None:
+    def test_char_grid_not_mutated_by_render(
+        self, char_grid_and_brightness, tiny_image: Image.Image
+    ) -> None:
         """render_frame must not mutate char_grid."""
         from PIL import ImageFont
+
         char_grid, brightness = char_grid_and_brightness
         original = copy.deepcopy(char_grid)
         rows = len(char_grid)
@@ -173,6 +182,7 @@ class TestRenderFrameInvariance:
         from PIL import ImageFont
 
         from aa_animator_v2.style_e_signal import _CELL_H, _CELL_W
+
         char_grid, brightness = char_grid_and_brightness
         rows = len(char_grid)
         cols = len(char_grid[0])
@@ -186,6 +196,7 @@ class TestRenderFrameInvariance:
         from PIL import ImageFont
 
         from aa_animator_v2.style_e_signal import _CELL_H, _CELL_W
+
         char_grid, brightness = char_grid_and_brightness
         rows = len(char_grid)
         cols = len(char_grid[0])
@@ -198,7 +209,7 @@ class TestRenderFrameInvariance:
         for r in range(rows):
             for c in range(cols):
                 if char_grid[r][c] == " ":
-                    region = arr[r * _CELL_H:(r + 1) * _CELL_H, c * _CELL_W:(c + 1) * _CELL_W]
+                    region = arr[r * _CELL_H : (r + 1) * _CELL_H, c * _CELL_W : (c + 1) * _CELL_W]
                     # Region should be background color, not glow color
                     mean = region.mean(axis=(0, 1))
                     assert mean[2] < 200, (
@@ -209,6 +220,7 @@ class TestRenderFrameInvariance:
 # ---------------------------------------------------------------------------
 # VALID_SIGNALS completeness
 # ---------------------------------------------------------------------------
+
 
 def test_valid_signals_count() -> None:
     assert set(VALID_SIGNALS) == {"jump", "scan", "wave", "pulse", "combo"}

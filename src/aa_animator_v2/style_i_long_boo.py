@@ -61,9 +61,9 @@ _FONT_PATHS: list[str] = [
 ]
 
 # Pan / zoom tuning — ported from aa_animator.py pan/zoom concepts
-_PAN_AMP_FRAC: float = 0.08    # max pan as fraction of canvas width
-_ZOOM_MIN: float = 1.00        # zoom at t=0
-_ZOOM_MAX: float = 1.12        # zoom at t=1 (gentle push-in)
+_PAN_AMP_FRAC: float = 0.08  # max pan as fraction of canvas width
+_ZOOM_MIN: float = 1.00  # zoom at t=0
+_ZOOM_MAX: float = 1.12  # zoom at t=1 (gentle push-in)
 
 
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -82,6 +82,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Motion: pan + zoom  (aa_animator.py:225-228, 264-267)
 # ---------------------------------------------------------------------------
+
 
 def _apply_pan_zoom(
     img: Image.Image,
@@ -122,6 +123,7 @@ def _apply_pan_zoom(
 # Vignette (aa_animator.py:346-355)
 # ---------------------------------------------------------------------------
 
+
 def _apply_vignette(img: Image.Image) -> Image.Image:
     """Radial darkening — d²×0.85 attenuation (aa_animator.py _vignette port).
 
@@ -137,7 +139,7 @@ def _apply_vignette(img: Image.Image) -> Image.Image:
     cy, cx = h / 2, w / 2
     d = np.sqrt((X - cx) ** 2 + (Y - cy) ** 2)
     d /= d.max()
-    mask = np.clip(1.0 - d ** 2 * 0.85, 0.15, 1.0)
+    mask = np.clip(1.0 - d**2 * 0.85, 0.15, 1.0)
     arr *= mask[..., None]
     return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
@@ -145,6 +147,7 @@ def _apply_vignette(img: Image.Image) -> Image.Image:
 # ---------------------------------------------------------------------------
 # DensityAA renderer with Ghostty charset
 # ---------------------------------------------------------------------------
+
 
 def _render_density_aa(
     frame_img: Image.Image,
@@ -197,6 +200,7 @@ def _render_density_aa(
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def generate_style_i(
     input_path: str | Path,
     output_path: str | Path,
@@ -247,15 +251,30 @@ def generate_style_i(
     out_h -= out_h % 2
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{out_w}x{out_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{out_w}x{out_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(

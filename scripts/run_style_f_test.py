@@ -55,6 +55,7 @@ _PATTERNS: list[str] = list(VALID_PATTERNS)
 # Discord sender
 # ---------------------------------------------------------------------------
 
+
 def _send_discord(file_path: Path, label: str) -> bool:
     """Send a file to Discord via the local hook script.
 
@@ -83,6 +84,7 @@ def _send_discord(file_path: Path, label: str) -> bool:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Style F dynamic lighting test runner")
@@ -170,13 +172,15 @@ def main() -> None:
             except Exception as exc:
                 elapsed = time.time() - t0
                 print(f"  FAIL  {exc}")
-                results.append({
-                    "output": str(out_path),
-                    "pattern": pattern,
-                    "image": img_name,
-                    "error": str(exc),
-                    "elapsed_s": round(elapsed, 2),
-                })
+                results.append(
+                    {
+                        "output": str(out_path),
+                        "pattern": pattern,
+                        "image": img_name,
+                        "error": str(exc),
+                        "elapsed_s": round(elapsed, 2),
+                    }
+                )
 
     results_path = _OUT_DIR / "results.json"
     results_path.write_text(json.dumps(results, indent=2))

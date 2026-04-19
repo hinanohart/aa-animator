@@ -76,6 +76,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # Motion effects: bob + sway (aa_animator.py:214-223)
 # ---------------------------------------------------------------------------
 
+
 def _apply_motion(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
     """Apply bob + sway effects to RGBA source image.
 
@@ -120,6 +121,7 @@ def _apply_motion(img: Image.Image, t: float, canvas_size: int) -> Image.Image:
 # Vignette (aa_animator.py:346-355)
 # ---------------------------------------------------------------------------
 
+
 def _apply_vignette(img: Image.Image) -> Image.Image:
     """Radial darkening — edges attenuated by d²×0.85.
 
@@ -137,7 +139,7 @@ def _apply_vignette(img: Image.Image) -> Image.Image:
     cy, cx = h / 2, w / 2
     d = np.sqrt((X - cx) ** 2 + (Y - cy) ** 2)
     d /= d.max()
-    mask = np.clip(1.0 - d ** 2 * 0.85, 0.15, 1.0)
+    mask = np.clip(1.0 - d**2 * 0.85, 0.15, 1.0)
     arr *= mask[..., None]
     return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
@@ -145,6 +147,7 @@ def _apply_vignette(img: Image.Image) -> Image.Image:
 # ---------------------------------------------------------------------------
 # BlockAA renderer (aa_animator.py:468-504)
 # ---------------------------------------------------------------------------
+
 
 def _render_block_aa(
     frame_img: Image.Image,
@@ -210,6 +213,7 @@ def _render_block_aa(
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def generate_style_h(
     input_path: str | Path,
     output_path: str | Path,
@@ -264,14 +268,28 @@ def generate_style_h(
     canvas_h -= canvas_h % 2
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-        "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "fast",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
         str(output_path),
     ]
     proc = subprocess.Popen(

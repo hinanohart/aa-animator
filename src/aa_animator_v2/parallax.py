@@ -55,6 +55,7 @@ def dynamic_amp_px(fg_coverage: float) -> int:
 # Forward warp
 # ---------------------------------------------------------------------------
 
+
 def forward_warp(img: np.ndarray, depth: np.ndarray, dx: float, dy: float) -> np.ndarray:
     """Depth-sorted forward scatter warp for an RGB image.
 
@@ -119,6 +120,7 @@ def warp_mask(mask: np.ndarray, depth: np.ndarray, dx: float, dy: float) -> np.n
 # Pixel-level hole fill
 # ---------------------------------------------------------------------------
 
+
 def fill_holes(img: np.ndarray, hole_mask: np.ndarray) -> np.ndarray:
     """Fill zero-valued scatter holes with weighted neighbour average.
 
@@ -158,9 +160,7 @@ def fill_holes(img: np.ndarray, hole_mask: np.ndarray) -> np.ndarray:
         valid = count_arr > 0
         fill_candidates = remaining & valid
         if fill_candidates.any():
-            out[fill_candidates] = (
-                sum_arr[fill_candidates] / count_arr[fill_candidates, np.newaxis]
-            )
+            out[fill_candidates] = sum_arr[fill_candidates] / count_arr[fill_candidates, np.newaxis]
 
     return out
 
@@ -168,6 +168,7 @@ def fill_holes(img: np.ndarray, hole_mask: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Orbit trajectory
 # ---------------------------------------------------------------------------
+
 
 def orbit_displacement(t: int, n_frames: int, amp_px: int) -> tuple[float, float]:
     """Circular parallax orbit displacement at frame *t*.

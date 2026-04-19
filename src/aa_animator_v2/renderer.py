@@ -68,6 +68,7 @@ _FONT_PATHS: list[str] = [
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     for p in _FONT_PATHS:
         try:
@@ -94,9 +95,9 @@ def _apply_color_mode(rgb: np.ndarray, mode: ColorMode) -> np.ndarray:
         return np.stack([lum * 0.15, lum, lum * 0.3], axis=-1)
     if mode == "cyber":
         l01 = lum / 255.0
-        r = 255 * (l01 ** 1.4) * 0.9
+        r = 255 * (l01**1.4) * 0.9
         g = 255 * l01 * 0.4
-        b = 255 * (l01 ** 0.7)
+        b = 255 * (l01**0.7)
         return np.stack([r, g, b], axis=-1)
     if mode == "amber":
         l01 = lum / 255.0
@@ -115,6 +116,7 @@ def _apply_color_mode(rgb: np.ndarray, mode: ColorMode) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Braille utilities
 # ---------------------------------------------------------------------------
+
 
 def brightness_to_braille(brightness_01: float) -> str:
     """Map a 0-1 brightness value to a Braille character (U+2800-28FF).
@@ -169,6 +171,7 @@ def _brightness_to_braille_bits_vectorised(cell_brightness: np.ndarray) -> np.nd
 # ---------------------------------------------------------------------------
 # FrameRenderer
 # ---------------------------------------------------------------------------
+
 
 class FrameRenderer:
     """Converts cell-level data to PIL Image frames.
@@ -256,7 +259,9 @@ class FrameRenderer:
         if self.mode == "braille":
             canvas_u8 = self._render_braille(cell_brightness, rows, cols, canvas_h, canvas_w)
         else:
-            canvas_u8 = self._render_ascii(cell_brightness, edge_cell, rows, cols, canvas_h, canvas_w)
+            canvas_u8 = self._render_ascii(
+                cell_brightness, edge_cell, rows, cols, canvas_h, canvas_w
+            )
 
         # Background masking
         mask_px = np.repeat(np.repeat(mask_cell, self.cell_h, axis=0), self.cell_w, axis=1)
@@ -268,12 +273,20 @@ class FrameRenderer:
         # Blue glow alpha-blend on edge neighbourhood
         if self.glow:
             from scipy.ndimage import binary_dilation  # type: ignore[import-untyped]
-            glow_cell = binary_dilation(edge_cell, structure=np.ones((3, 3), dtype=bool)) & ~edge_cell
+
+            glow_cell = (
+                binary_dilation(edge_cell, structure=np.ones((3, 3), dtype=bool)) & ~edge_cell
+            )
             glow_active = glow_cell & mask_cell
             if glow_active.any():
-                glow_px = np.repeat(np.repeat(glow_active, self.cell_h, axis=0), self.cell_w, axis=1)
+                glow_px = np.repeat(
+                    np.repeat(glow_active, self.cell_h, axis=0), self.cell_w, axis=1
+                )
                 region = canvas_u8[glow_px].astype(np.float32)
-                region = region * (1.0 - GLOW_ALPHA) + np.array(GLOW_COLOR, dtype=np.float32) * GLOW_ALPHA
+                region = (
+                    region * (1.0 - GLOW_ALPHA)
+                    + np.array(GLOW_COLOR, dtype=np.float32) * GLOW_ALPHA
+                )
                 canvas_u8[glow_px] = np.clip(region, 0, 255).astype(np.uint8)
 
         return Image.fromarray(canvas_u8)
@@ -291,9 +304,9 @@ class FrameRenderer:
         assert self._braille_bitmaps is not None
         bits_arr = _brightness_to_braille_bits_vectorised(cell_brightness)  # (ROWS, COLS)
         selected = self._braille_bitmaps[bits_arr]  # (ROWS, COLS, cell_h, cell_w, 3)
-        return np.ascontiguousarray(
-            selected.transpose(0, 2, 1, 3, 4)
-        ).reshape(canvas_h, canvas_w, 3)
+        return np.ascontiguousarray(selected.transpose(0, 2, 1, 3, 4)).reshape(
+            canvas_h, canvas_w, 3
+        )
 
     def _render_ascii(
         self,
@@ -307,6 +320,6 @@ class FrameRenderer:
         char_idx = np.clip((cell_brightness * (NCHARS - 1)).astype(np.int32), 0, NCHARS - 1)
         color_type = edge_cell.astype(np.int32)  # 0 = body, 1 = edge
         selected = self._ascii_bitmaps[char_idx, color_type]  # (ROWS, COLS, cell_h, cell_w, 3)
-        return np.ascontiguousarray(
-            selected.transpose(0, 2, 1, 3, 4)
-        ).reshape(canvas_h, canvas_w, 3)
+        return np.ascontiguousarray(selected.transpose(0, 2, 1, 3, 4)).reshape(
+            canvas_h, canvas_w, 3
+        )

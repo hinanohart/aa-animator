@@ -41,6 +41,7 @@ from aa_animator_v2._boo_postprocess import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def font():
     return ImageFont.load_default()
@@ -84,6 +85,7 @@ def rendered_dark(cols) -> Image.Image:
 # apply_outline_ring
 # ---------------------------------------------------------------------------
 
+
 class TestApplyOutlineRing:
     def test_output_same_size(self, rendered_gray, tiny_frame_rgb, cols, font):
         out = apply_outline_ring(rendered_gray, tiny_frame_rgb, cols, font)
@@ -115,12 +117,15 @@ class TestApplyOutlineRing:
         arr = np.array(out)
         # Most pixels should still be dark (background), even with edge overlay
         dark_frac = (arr.mean(axis=2) < 50).mean()
-        assert dark_frac > 0.5, f"Too many bright pixels after outline ring on dark rendered: {dark_frac:.2%}"
+        assert dark_frac > 0.5, (
+            f"Too many bright pixels after outline ring on dark rendered: {dark_frac:.2%}"
+        )
 
 
 # ---------------------------------------------------------------------------
 # apply_blue_glow
 # ---------------------------------------------------------------------------
+
 
 class TestApplyBlueGlow:
     def test_output_same_size(self, rendered_gray, tiny_frame_rgb, cols):

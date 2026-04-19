@@ -42,6 +42,7 @@ from aa_animator_v2.style_h_bird import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def bright_square() -> Image.Image:
     """48×48 RGBA image — bright white subject on transparent bg."""
@@ -69,6 +70,7 @@ def font():
 # ---------------------------------------------------------------------------
 # _apply_motion
 # ---------------------------------------------------------------------------
+
 
 class TestApplyMotion:
     def test_output_is_rgb_canvas_size(self, bright_square):
@@ -119,6 +121,7 @@ class TestApplyMotion:
 # _apply_vignette
 # ---------------------------------------------------------------------------
 
+
 class TestApplyVignette:
     def test_corners_darker_than_centre(self):
         """Uniform bright image: corners should be attenuated vs centre."""
@@ -146,6 +149,7 @@ class TestApplyVignette:
 # ---------------------------------------------------------------------------
 # _render_block_aa
 # ---------------------------------------------------------------------------
+
 
 class TestRenderBlockAA:
     def test_output_width_is_cols_times_cell_w(self, small_rgb, font):
@@ -184,6 +188,7 @@ class TestRenderBlockAA:
 # ---------------------------------------------------------------------------
 # bob formula cross-check
 # ---------------------------------------------------------------------------
+
 
 class TestBobFormula:
     @pytest.mark.parametrize("t", [0.0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75])

@@ -48,11 +48,13 @@ from aa_animator_v2.style_f_lighting import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def tiny_image() -> Image.Image:
     """20×10 RGB test image with a bright foreground rectangle."""
     img = Image.new("RGB", (20, 10), (8, 8, 12))
     from PIL import ImageDraw
+
     d = ImageDraw.Draw(img)
     d.rectangle([4, 2, 16, 8], fill=(200, 200, 200))
     return img
@@ -66,6 +68,7 @@ def base_brightness(tiny_image: Image.Image) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # compute_base_brightness — frame-invariance
 # ---------------------------------------------------------------------------
+
 
 class TestComputeBaseBrightness:
     def test_shape(self, tiny_image: Image.Image) -> None:
@@ -93,6 +96,7 @@ class TestComputeBaseBrightness:
 # ---------------------------------------------------------------------------
 # compute_lit_intensity — smooth float output
 # ---------------------------------------------------------------------------
+
 
 class TestComputeLitIntensity:
     ROWS, COLS = 10, 20
@@ -134,7 +138,10 @@ class TestComputeLitIntensity:
         lx, ly = cols / 2.0, rows / 2.0
         lit = compute_lit_intensity(
             np.zeros_like(base_brightness),  # zero base to isolate falloff
-            lx, ly, sigma=3.0, light_intensity=0.8,
+            lx,
+            ly,
+            sigma=3.0,
+            light_intensity=0.8,
         )
         cx, cy = int(lx), int(ly)
         # Centre cell brighter than corner
@@ -144,6 +151,7 @@ class TestComputeLitIntensity:
 # ---------------------------------------------------------------------------
 # Light source trajectories
 # ---------------------------------------------------------------------------
+
 
 class TestLightTrajectories:
     ROWS, COLS = 41, 100
@@ -192,6 +200,7 @@ class TestLightTrajectories:
 # lerp_color — boundary values
 # ---------------------------------------------------------------------------
 
+
 class TestLerpColor:
     def test_alpha_zero_returns_white(self) -> None:
         result = lerp_color(_STATIC_COLOR, _GLOW_COLOR, alpha=0.0)
@@ -221,13 +230,16 @@ class TestLerpColor:
 # quantize_to_glyph
 # ---------------------------------------------------------------------------
 
+
 class TestQuantizeToGlyph:
     def test_zero_returns_first_char(self) -> None:
         from aa_animator_v2.style_f_lighting import _GHOSTTY_CHARS
+
         assert quantize_to_glyph(0.0) == _GHOSTTY_CHARS[0]
 
     def test_one_returns_last_char(self) -> None:
         from aa_animator_v2.style_f_lighting import _GHOSTTY_CHARS
+
         assert quantize_to_glyph(1.0) == _GHOSTTY_CHARS[-1]
 
 
@@ -235,12 +247,16 @@ class TestQuantizeToGlyph:
 # render_frame — space cells never drawn
 # ---------------------------------------------------------------------------
 
+
 class TestRenderFrame:
-    def test_space_cells_stay_background(self, base_brightness: np.ndarray, tiny_image: Image.Image) -> None:
+    def test_space_cells_stay_background(
+        self, base_brightness: np.ndarray, tiny_image: Image.Image
+    ) -> None:
         """Space cells must remain background colour regardless of high lit_intensity."""
         from PIL import ImageFont
 
         from aa_animator_v2.style_f_lighting import _CELL_H, _CELL_W, _build_char_grid
+
         char_grid = _build_char_grid(base_brightness)
         # All cells lit at max intensity
         lit = np.ones_like(base_brightness)
@@ -252,7 +268,7 @@ class TestRenderFrame:
         for r in range(rows):
             for c in range(cols):
                 if char_grid[r][c] == " ":
-                    region = arr[r * _CELL_H:(r + 1) * _CELL_H, c * _CELL_W:(c + 1) * _CELL_W]
+                    region = arr[r * _CELL_H : (r + 1) * _CELL_H, c * _CELL_W : (c + 1) * _CELL_W]
                     mean_blue = float(region[..., 2].mean())
                     assert mean_blue < 200, (
                         f"Space cell ({r},{c}) appears lit — background leak detected"
@@ -262,6 +278,7 @@ class TestRenderFrame:
         from PIL import ImageFont
 
         from aa_animator_v2.style_f_lighting import _CELL_H, _CELL_W, _build_char_grid
+
         char_grid = _build_char_grid(base_brightness)
         rows = len(char_grid)
         cols = len(char_grid[0])
@@ -274,6 +291,7 @@ class TestRenderFrame:
 # ---------------------------------------------------------------------------
 # VALID_PATTERNS completeness
 # ---------------------------------------------------------------------------
+
 
 def test_valid_patterns_count() -> None:
     assert set(VALID_PATTERNS) == {

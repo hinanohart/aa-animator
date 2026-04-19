@@ -53,11 +53,11 @@ _FONT_PATHS: list[str] = [
 ]
 
 # Boo-motion tuning knobs (self-designed, not extracted from any boo frame data)
-_MASS_SWING_FREQ: float = 3.0   # cycles per second
-_MASS_X_AMP: float = 0.10       # max horizontal squash fraction
-_MASS_Y_AMP: float = 0.12       # max vertical stretch fraction
-_SWAY_CELLS: float = 2.0        # ±cell sway amplitude
-_BOB_PX: float = 14.0           # vertical bob pixels
+_MASS_SWING_FREQ: float = 3.0  # cycles per second
+_MASS_X_AMP: float = 0.10  # max horizontal squash fraction
+_MASS_Y_AMP: float = 0.12  # max vertical stretch fraction
+_SWAY_CELLS: float = 2.0  # ±cell sway amplitude
+_BOB_PX: float = 14.0  # vertical bob pixels
 _GLOW_ALPHA_BASE: float = 0.20
 _GLOW_ALPHA_SWING: float = 0.20  # glow oscillates 0.20..0.40
 
@@ -78,6 +78,7 @@ def _srgb_luma(arr: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Boo-inspired motion (self-designed)
 # ---------------------------------------------------------------------------
+
 
 def _apply_boo_motion(img: Image.Image, t: float, canvas_size: int) -> tuple[Image.Image, float]:
     """Apply boo-inspired motion template.
@@ -115,7 +116,9 @@ def _apply_boo_motion(img: Image.Image, t: float, canvas_size: int) -> tuple[Ima
     offset_x = sway_px
 
     # 4. Glow alpha: pulsates in sync with mass swing (phase +pi/2 for smooth feel)
-    glow_alpha = _GLOW_ALPHA_BASE + _GLOW_ALPHA_SWING * (0.5 + 0.5 * math.sin(freq_rad + math.pi / 2))
+    glow_alpha = _GLOW_ALPHA_BASE + _GLOW_ALPHA_SWING * (
+        0.5 + 0.5 * math.sin(freq_rad + math.pi / 2)
+    )
 
     # Apply transform
     cw, ch = img.size
@@ -134,6 +137,7 @@ def _apply_boo_motion(img: Image.Image, t: float, canvas_size: int) -> tuple[Ima
 # ---------------------------------------------------------------------------
 # DensityAA render (same as style_a_gallery — kept local to avoid coupling)
 # ---------------------------------------------------------------------------
+
 
 def _render_density_aa(
     frame_img: Image.Image,
@@ -182,7 +186,9 @@ def _apply_edge_glow(
 
     w, h = frame_img.size
     rows = max(1, int(h * cols / w * _FONT_RATIO))
-    small_gray = np.array(frame_img.convert("L").resize((cols, rows), Image.LANCZOS)).astype(np.float32)
+    small_gray = np.array(frame_img.convert("L").resize((cols, rows), Image.LANCZOS)).astype(
+        np.float32
+    )
 
     sx = scipy_sobel(small_gray, axis=1)
     sy = scipy_sobel(small_gray, axis=0)
@@ -204,8 +210,7 @@ def _apply_edge_glow(
             x0, x1 = cx * _CELL_W, (cx + 1) * _CELL_W
             region = canvas_arr[y0:y1, x0:x1]
             region[:] = (
-                region * (1.0 - glow_alpha)
-                + np.array(_GLOW_COLOR, dtype=np.float32) * glow_alpha
+                region * (1.0 - glow_alpha) + np.array(_GLOW_COLOR, dtype=np.float32) * glow_alpha
             )
 
     return Image.fromarray(np.clip(canvas_arr, 0, 255).astype(np.uint8))
@@ -214,6 +219,7 @@ def _apply_edge_glow(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def generate_style_b(
     input_path: str | Path,
@@ -266,20 +272,37 @@ def generate_style_b(
         frames.append(aa_frame)
 
     cmd = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-pixel_format", "rgb24",
-        "-video_size", f"{canvas_w}x{canvas_h}",
-        "-framerate", str(fps),
-        "-i", "pipe:0",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "20",
-        "-tune", "animation", "-movflags", "+faststart",
-        "-pix_fmt", "yuv420p",
+        "ffmpeg",
+        "-y",
+        "-f",
+        "rawvideo",
+        "-pixel_format",
+        "rgb24",
+        "-video_size",
+        f"{canvas_w}x{canvas_h}",
+        "-framerate",
+        str(fps),
+        "-i",
+        "pipe:0",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "20",
+        "-tune",
+        "animation",
+        "-movflags",
+        "+faststart",
+        "-pix_fmt",
+        "yuv420p",
         str(output_path),
     ]
     proc = subprocess.Popen(
-        cmd, stdin=subprocess.PIPE,
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
     )
     assert proc.stdin is not None
     for frame in frames:

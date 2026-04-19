@@ -43,6 +43,7 @@ from aa_animator_v2.style_i_long_boo import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def subject_rgba() -> Image.Image:
     """64×64 RGBA with a bright white subject on transparent background."""
@@ -71,6 +72,7 @@ def font():
 # Charset
 # ---------------------------------------------------------------------------
 
+
 def test_ghostty_chars_is_correct():
     assert _GHOSTTY_CHARS == " ·~ox+=*%$@"
     assert len(_GHOSTTY_CHARS) == 11
@@ -79,6 +81,7 @@ def test_ghostty_chars_is_correct():
 # ---------------------------------------------------------------------------
 # _apply_pan_zoom
 # ---------------------------------------------------------------------------
+
 
 class TestApplyPanZoom:
     def test_output_is_rgb_canvas_size(self, subject_rgba):
@@ -122,6 +125,7 @@ class TestApplyPanZoom:
 # _apply_vignette
 # ---------------------------------------------------------------------------
 
+
 class TestApplyVignette:
     def test_corners_darker_than_centre(self):
         img = Image.new("RGB", (100, 50), (200, 200, 200))
@@ -149,6 +153,7 @@ class TestApplyVignette:
 # _render_density_aa
 # ---------------------------------------------------------------------------
 
+
 class TestRenderDensityAA:
     def test_output_width_is_cols_times_cell_w(self, small_rgb_40, font):
         cols = 8
@@ -174,6 +179,7 @@ class TestRenderDensityAA:
 # Outline ring visible on subject image
 # ---------------------------------------------------------------------------
 
+
 def test_outline_ring_count_positive():
     """Outline ring must produce at least some bright outline-colour pixels."""
     subject = Image.new("RGB", (80, 80), (8, 8, 12))
@@ -183,6 +189,7 @@ def test_outline_ring_count_positive():
     font = ImageFont.load_default()
     cols = 12
     from aa_animator_v2._boo_postprocess import FONT_RATIO
+
     rows = max(1, int(80 * cols / 80 * FONT_RATIO))
     rendered = Image.new("RGB", (cols * CELL_W, rows * CELL_H), (80, 80, 80))
 

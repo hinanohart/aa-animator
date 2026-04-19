@@ -60,6 +60,7 @@ _STYLES: list[tuple[str, str, object]] = [
 # Discord sender (same pattern as run_style_g_test.py)
 # ---------------------------------------------------------------------------
 
+
 def _send_discord(file_path: Path, label: str) -> bool:
     if not _DISCORD_HOOK.exists():
         print(f"  [discord] hook not found: {_DISCORD_HOOK}", file=sys.stderr)
@@ -70,10 +71,15 @@ def _send_discord(file_path: Path, label: str) -> bool:
         return False
     result = subprocess.run(
         [str(_DISCORD_HOOK), str(file_path), label],
-        capture_output=True, text=True, timeout=60,
+        capture_output=True,
+        text=True,
+        timeout=60,
     )
     if result.returncode != 0:
-        print(f"  [discord] FAILED ({result.returncode}): {result.stderr.strip()[:120]}", file=sys.stderr)
+        print(
+            f"  [discord] FAILED ({result.returncode}): {result.stderr.strip()[:120]}",
+            file=sys.stderr,
+        )
         return False
     return True
 
@@ -81,6 +87,7 @@ def _send_discord(file_path: Path, label: str) -> bool:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="aa-animator v0.6 style_i + style_j boo runner")
@@ -98,7 +105,10 @@ def main() -> int:
     done = 0
 
     print(f"[runner] output dir: {_OUT_DIR}", file=sys.stderr)
-    print(f"[runner] generating {len(_IMAGES)} images × {len(_STYLES)} styles = {total} MP4s", file=sys.stderr)
+    print(
+        f"[runner] generating {len(_IMAGES)} images × {len(_STYLES)} styles = {total} MP4s",
+        file=sys.stderr,
+    )
 
     for style_id, style_label, gen_fn in _STYLES:
         style_fps = 24 if style_id == "I" else 30
@@ -114,16 +124,21 @@ def main() -> int:
 
             if not img_path.exists():
                 print(f"  SKIP — image not found: {img_path}", file=sys.stderr)
-                results.append({
-                    "style": style_id, "image": img_name,
-                    "status": "skipped_missing_input", "output_path": None,
-                })
+                results.append(
+                    {
+                        "style": style_id,
+                        "image": img_name,
+                        "status": "skipped_missing_input",
+                        "output_path": None,
+                    }
+                )
                 continue
 
             t0 = time.time()
             try:
                 info = gen_fn(
-                    img_path, out_path,
+                    img_path,
+                    out_path,
                     cols=args.cols,
                     canvas_size=args.canvas_size,
                     fps=style_fps,
@@ -144,8 +159,10 @@ def main() -> int:
                 )
 
                 rec: dict = {
-                    "style": style_id, "style_label": style_label,
-                    "image": img_name, "status": "ok",
+                    "style": style_id,
+                    "style_label": style_label,
+                    "image": img_name,
+                    "status": "ok",
                     "output_path": str(out_path),
                     "elapsed_s": round(elapsed, 1),
                     "size_mb": round(size_mb, 3),
@@ -173,39 +190,57 @@ def main() -> int:
             except Exception as exc:
                 elapsed = time.time() - t0
                 print(f"  FAIL  {exc}", file=sys.stderr)
-                results.append({
-                    "style": style_id, "style_label": style_label,
-                    "image": img_name, "status": "error",
-                    "error": str(exc), "elapsed_s": round(elapsed, 1),
-                    "output_path": None, "discord_sent": False,
-                })
+                results.append(
+                    {
+                        "style": style_id,
+                        "style_label": style_label,
+                        "image": img_name,
+                        "status": "error",
+                        "error": str(exc),
+                        "elapsed_s": round(elapsed, 1),
+                        "output_path": None,
+                        "discord_sent": False,
+                    }
+                )
 
     # Write results.json
     results_path = _OUT_DIR / "results.json"
-    results_path.write_text(json.dumps(
-        {
-            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-            "discord_sent": discord_ok,
-            "discord_failed": discord_fail,
-            "results": results,
-        },
-        indent=2, ensure_ascii=False,
-    ))
+    results_path.write_text(
+        json.dumps(
+            {
+                "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "discord_sent": discord_ok,
+                "discord_failed": discord_fail,
+                "results": results,
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+    )
     print(f"\n[runner] results written: {results_path}", file=sys.stderr)
 
     ok = [r for r in results if r.get("status") == "ok"]
     err = [r for r in results if r.get("status") == "error"]
     skip = [r for r in results if r.get("status") == "skipped_missing_input"]
 
-    print(f"\n{'='*70}", file=sys.stderr)
-    print(f"  Generated: {len(ok)}/{total}   Errors: {len(err)}   Skipped: {len(skip)}", file=sys.stderr)
+    print(f"\n{'=' * 70}", file=sys.stderr)
+    print(
+        f"  Generated: {len(ok)}/{total}   Errors: {len(err)}   Skipped: {len(skip)}",
+        file=sys.stderr,
+    )
     if not args.dry_run:
         print(f"  Discord: sent={discord_ok}  failed={discord_fail}", file=sys.stderr)
-    print(f"{'='*70}", file=sys.stderr)
+    print(f"{'=' * 70}", file=sys.stderr)
 
     if ok:
-        print(f"\n  {'Style':<8} {'Image':<12} {'MB':>5} {'Ring':>6} {'Blue':>6} {'Heavy%':>8} {'KL':>6}", file=sys.stderr)
-        print(f"  {'-'*8} {'-'*12} {'-'*5} {'-'*6} {'-'*6} {'-'*8} {'-'*6}", file=sys.stderr)
+        print(
+            f"\n  {'Style':<8} {'Image':<12} {'MB':>5} {'Ring':>6} {'Blue':>6} {'Heavy%':>8} {'KL':>6}",
+            file=sys.stderr,
+        )
+        print(
+            f"  {'-' * 8} {'-' * 12} {'-' * 5} {'-' * 6} {'-' * 6} {'-' * 8} {'-' * 6}",
+            file=sys.stderr,
+        )
         for r in ok:
             m = r["metrics"]
             print(

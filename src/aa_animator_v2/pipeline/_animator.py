@@ -96,9 +96,9 @@ class AAAnimator:
         self._img_h: int | None = None
 
         # State set by load_image / segment_subject
-        self._img_np: np.ndarray | None = None      # (H, W, 3) float32 [0-1]
-        self._fg_mask: np.ndarray | None = None     # (H, W) bool
-        self._depth: np.ndarray | None = None       # (H, W) float32 [0-1]
+        self._img_np: np.ndarray | None = None  # (H, W, 3) float32 [0-1]
+        self._fg_mask: np.ndarray | None = None  # (H, W) bool
+        self._depth: np.ndarray | None = None  # (H, W) float32 [0-1]
 
         self._renderer: FrameRenderer | None = None
         self._smoother: TemporalSmoother = TemporalSmoother(alpha=0.3)
@@ -135,9 +135,7 @@ class AAAnimator:
         self._img_w = self.cols * self._cell_w
         self._img_h = rows * self._cell_h
 
-        img = Image.open(path).convert("RGB").resize(
-            (self._img_w, self._img_h), Image.LANCZOS
-        )
+        img = Image.open(path).convert("RGB").resize((self._img_w, self._img_h), Image.LANCZOS)
         self._img_np = np.array(img, dtype=np.float32) / 255.0
         self._fg_mask = None
         self._depth = None
@@ -269,14 +267,15 @@ class AAAnimator:
             # Foreground mask at cell level
             mask_cell: np.ndarray | None = None
             if frame_mask is not None:
-                mask_cell = (
-                    frame_mask.reshape(rows, cell_h, cols, cell_w).mean(axis=(1, 3)) > 0.3
-                )
+                mask_cell = frame_mask.reshape(rows, cell_h, cols, cell_w).mean(axis=(1, 3)) > 0.3
 
             # Cell-level hole fill post-process (handles residual gaps)
             if mask_cell is not None:
                 cell_brightness = fill_cell_holes(
-                    cell_brightness, frame_np, mask_cell, (rows, cell_h, cols, cell_w),
+                    cell_brightness,
+                    frame_np,
+                    mask_cell,
+                    (rows, cell_h, cols, cell_w),
                 )
 
             # Histogram stretch — fg cells only when mask available
@@ -345,9 +344,7 @@ class AAAnimator:
 
     # ------------------------------------------------------------------ private run helpers
 
-    def _prepare_run(
-        self, input_path: str | Path
-    ) -> tuple[Image.Image, list[np.ndarray] | None]:
+    def _prepare_run(self, input_path: str | Path) -> tuple[Image.Image, list[np.ndarray] | None]:
         """Load image, run segmentation + depth, compute warped masks.
 
         Shared setup for :meth:`animate`, :meth:`preview`, and :meth:`bake`.
