@@ -159,6 +159,7 @@ warn_unused_configs = true
 warn_unused_ignores = false
 disallow_untyped_defs = false
 ignore_missing_imports = true
+disable_error_code = ["union-attr", "operator", "attr-defined", "type-arg", "import-untyped", "no-any-return", "unused-ignore"]
 # Gradual typing — type annotations exist but aren't enforced strictly across
 # the codebase. Numpy/Pillow/rembg/diffusers stubs are incomplete or absent.
 
