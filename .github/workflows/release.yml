@@ -40,7 +40,8 @@ jobs:
           FRAG_A='run''za'
           FRAG_B='DESKTOP-[A-Z0-9]+'
           FRAG_C='/mnt/c/'
-          PATTERN="${FRAG_A}|${FRAG_A}isongpu|${FRAG_B}|${FRAG_C}|/home/${FRAG_A}"
+          FRAG_D='hin''ata'
+          PATTERN="${FRAG_A}|${FRAG_A}isongpu|${FRAG_B}|${FRAG_C}|/home/${FRAG_A}|${FRAG_D}"
           FAIL=0
           REFS=$(git for-each-ref --format='%(refname)' refs/tags refs/heads refs/remotes)
           REFS="HEAD $REFS"
