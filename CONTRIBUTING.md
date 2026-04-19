@@ -38,7 +38,7 @@ All 69 tests must pass before opening a PR. Do not modify test assertions to for
 ```bash
 ruff check src tests
 ruff format src tests
-mypy --strict src/aa_animator_v2
+mypy src/aa_animator_v2
 ```
 
 The CI matrix runs all of these automatically.

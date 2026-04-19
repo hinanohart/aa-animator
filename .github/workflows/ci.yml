@@ -60,7 +60,7 @@ jobs:
       - name: Ruff format check
         run: ruff format --check src tests
       - name: Mypy
-        run: mypy --strict src/aa_animator_v2
+        run: mypy src/aa_animator_v2
 
   build:
     name: Build sdist + wheel

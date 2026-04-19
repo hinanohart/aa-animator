@@ -207,7 +207,7 @@ ruff check src tests
 ruff format src tests
 
 # Type check
-mypy --strict src/aa_animator_v2
+mypy src/aa_animator_v2
 
 # Pre-commit hooks
 pre-commit run --all-files
