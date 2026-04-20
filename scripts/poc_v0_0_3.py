@@ -458,6 +458,7 @@ for f in range(N_FRAMES):
     glow_cell = build_glow_mask_cells(edge_cell)
 
     if BRAILLE_ON:
+        assert braille_bitmaps is not None, "braille_bitmaps must be initialized when BRAILLE_ON"
         n_dots_arr = np.clip((cell_brightness * 8).round().astype(int), 0, 8)
         dot_order = [0, 3, 1, 4, 2, 5, 6, 7]
         bits_arr = np.zeros((ROWS, COLS), dtype=np.int32)
