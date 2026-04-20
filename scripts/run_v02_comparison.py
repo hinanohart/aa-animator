@@ -137,8 +137,8 @@ def main() -> int:
     for style_id, style_label in _STYLES:
         gen_fn = _GENERATORS[style_id]
         for img_path_str, img_name in _IMAGES:
-            img_path = Path(img_path_str)
-            if not img_path.exists():
+            img_path_obj = Path(img_path_str)
+            if not img_path_obj.exists():
                 results.append(
                     {
                         "style": style_id,
@@ -158,7 +158,7 @@ def main() -> int:
             t0 = time.time()
             try:
                 info = gen_fn(
-                    img_path,
+                    img_path_obj,
                     out_path,
                     cols=args.cols,
                     fps=args.fps,
