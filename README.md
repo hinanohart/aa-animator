@@ -4,9 +4,13 @@
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![PyPI](https://img.shields.io/pypi/v/aa-animator.svg)](https://pypi.org/project/aa-animator/)
 
-**Turn any still photo into an animated ASCII art video — subject only, Ghostty-grade quality.**
+**Turn any still photo into an animated ASCII art video — subject only, terminal-grade quality.**
 
-One image in, one MP4 out. Depth-parallax warp drives the motion; edge-aware rendering and blue-glow contouring match Ghostty's visual standard. No hand-drawn frames, no fixed silhouette.
+One image in, one MP4 out. Depth-parallax warp drives the motion; edge-aware rendering and blue-glow contouring follow a terminal-friendly visual aesthetic. No hand-drawn frames, no fixed silhouette.
+
+> **Disclaimer:** This is an **independent third-party tool**. It is **not affiliated with, endorsed by, or sponsored by** Ghostty (Mitchell Hashimoto), Depth Anything V2 authors, or HuggingFace. Trademarked names appear nominatively to describe the visual reference and the upstream model dependencies.
+
+> ⚠️ **Subject in input photos must be one you have rights to depict.** This tool produces derivative renders and ships **no celebrity, idol, or copyrighted character imagery** in either code or examples.
 
 > **Recommended preset**: `style_i` (long_cinematic + Ghostty palette + outline ring + blue glow).
 > After iterating through 10+ style variants (A–J), the `long_cinematic`-based pipeline delivered the most stable visual quality. Other styles (Braille, signal-driven, 3D lighting, bird/block-bob) are retained as experiments under `src/aa_animator_v2/style_*.py`.
