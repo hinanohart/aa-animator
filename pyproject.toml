@@ -7,7 +7,7 @@ name = "aa-animator"
 version = "0.1.0.dev1"
 description = "Still image → subject-only animated ASCII art video. Depth-parallax warp + Ghostty-grade rendering."
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.11,<3.14"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "Hinano Hart", email = "hinanohart@gmail.com" }]
@@ -29,7 +29,6 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -43,7 +42,7 @@ dependencies = [
   "pillow>=10.0",
   "opencv-python-headless>=4.8",
   "scipy>=1.11",
-  "rembg>=2.0",
+  "rembg>=2.0.75",  # CVE / GHSA -> 2.0.75 (rembg 2.0.75 itself requires python>=3.11)
   "onnxruntime>=1.15",
   "torch>=2.1",
   "transformers>=4.53.0",  # CVE-2025-5197 (ReDoS) / CVE-2025-3777 fix floor
@@ -126,7 +125,7 @@ filterwarnings = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "PL", "RUF", "S", "SIM", "PIE"]
@@ -152,7 +151,7 @@ ignore = [
 "src/aa_animator_v2/pipeline/_encoding.py" = ["S603", "PLW1510"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = false
 warn_return_any = false
 warn_unused_configs = true
