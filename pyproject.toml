@@ -55,7 +55,7 @@ dependencies = [
 # Kept for backward compatibility with existing install instructions.
 matte = []
 i2v = [
-  "diffusers>=0.27",
+  "diffusers>=0.38.0",  # GHSA-98h9-4798-4q5v (trust_remote_code bypass, fixed in 0.38.0)
   "accelerate>=0.29",
 ]
 dev = [
