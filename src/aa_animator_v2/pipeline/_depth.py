@@ -30,6 +30,14 @@ from PIL import Image
 # Defined once to prevent drift between code and docs/legal-notes.md.
 _DA_V2_MODEL_ID = "depth-anything/Depth-Anything-V2-Small-hf"
 
+# HuggingFace commit SHA captured during the 2026-05-09 supply-chain
+# audit. Pinning the revision blocks the case where the upstream
+# repository silently re-uploads a new checkpoint with the same
+# repo id (content drift), so deterministic behaviour and license
+# claims survive the next push to ``main`` over there. Override
+# explicitly when you want a newer or older checkpoint.
+_DA_V2_MODEL_REVISION = "5426e4f0f36572d16453bbda7a8389317b1bef99"
+
 
 def _normalize_depth(depth_raw: np.ndarray, target_size: tuple[int, int]) -> np.ndarray:
     """Resize and normalise a raw depth array to [0, 1].
@@ -89,6 +97,7 @@ def estimate_depth(image: Image.Image, target_size: tuple[int, int]) -> np.ndarr
         depth_pipe = hf_pipeline(
             task="depth-estimation",
             model=_DA_V2_MODEL_ID,
+            revision=_DA_V2_MODEL_REVISION,
             device=device,
         )
         result = depth_pipe(image)
