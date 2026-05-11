@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11,<3.14"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-authors = [{ name = "Hinano Hart", email = "hinanohart@gmail.com" }]
+authors = [{ name = "aa-animator contributors" }]
 keywords = [
   "ascii-art",
   "animation",
