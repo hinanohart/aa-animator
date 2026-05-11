@@ -8,7 +8,7 @@ version = "0.1.0.dev1"
 description = "Still image → subject-only animated ASCII art video. Depth-parallax warp + Ghostty-grade rendering."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
-license = "Apache-2.0"
+license = "MIT"
 license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "aa-animator contributors" }]
 keywords = [
@@ -25,7 +25,7 @@ classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Developers",
   "Intended Audience :: End Users/Desktop",
-  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: MIT License",
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS",
   "Programming Language :: Python :: 3",
