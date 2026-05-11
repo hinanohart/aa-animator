@@ -1,6 +1,6 @@
 # aa-animator
 
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![PyPI](https://img.shields.io/pypi/v/aa-animator.svg)](https://pypi.org/project/aa-animator/)
 
@@ -223,7 +223,7 @@ CI matrix: Python 3.10–3.13 × Ubuntu + macOS (see `.github/workflows/ci.yml`)
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ### Third-party attribution
 
