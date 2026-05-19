@@ -173,3 +173,8 @@ module = [
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
+
+[tool.uv]
+# CVE-2024-3651: idna < 3.15 is vulnerable to a slow ReDoS via crafted input.
+# Pin the floor regardless of which transitive dep requests idna.
+constraint-dependencies = ["idna>=3.15"]
