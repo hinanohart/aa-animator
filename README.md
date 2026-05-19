@@ -245,7 +245,7 @@ provides no cryptographic provenance — pin to a current release if assurance m
 
 ## License
 
-MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+MIT. See [LICENSE](LICENSE). Third-party attribution table below.
 
 ### Third-party attribution
 
