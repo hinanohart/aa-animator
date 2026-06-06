@@ -32,7 +32,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install ffmpeg (Ubuntu)
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y ffmpeg
+        run: |
+          for i in 1 2 3; do
+            sudo apt-get update && sudo apt-get install -y --fix-missing ffmpeg && break
+            echo "apt-get attempt $i failed (transient mirror 404), retrying in 5s..."; sleep 5
+          done
       - name: Install ffmpeg (macOS)
         if: runner.os == 'macOS'
         run: brew install ffmpeg
