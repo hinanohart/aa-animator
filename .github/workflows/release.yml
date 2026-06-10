@@ -30,21 +30,22 @@ jobs:
         with:
           python-version: "3.12"
       # Refuse to release anything containing maintainer real-identity markers.
-      # Pattern is built from fragments so the guard rule itself does not
-      # self-match against its own definition.
+      # The match pattern is stored as a repository/organization secret
+      # (IDENTITY_GUARD_PATTERN) so that no real-identity token ever appears in
+      # this tracked workflow file. The guard fails closed: if the secret is
+      # not configured, the release is blocked.
       # DOCUMENTED LIMITATION: This guard does NOT scan for softsplat code
       # patterns (sniklaus API). That check is a manual maintainer responsibility
       # before each release — see docs/legal-notes.md "Compliance procedure".
       - name: Identity-leak guard (history-wide)
+        env:
+          PATTERN: ${{ secrets.IDENTITY_GUARD_PATTERN }}
         run: |
           set -euo pipefail
-          # FRAG pattern: identity tokens are split at source to avoid matching
-          # in simple grep-based secret scanners. See yuragi v0.5.1 precedent.
-          FRAG_A='run''za'
-          FRAG_B='DESKTOP-[A-Z0-9]+'
-          FRAG_C='/mnt/c/'
-          FRAG_D='hin''ata'
-          PATTERN="${FRAG_A}|${FRAG_A}isongpu|${FRAG_B}|${FRAG_C}|/home/${FRAG_A}|${FRAG_D}"
+          if [ -z "${PATTERN:-}" ]; then
+            echo "::error::IDENTITY_GUARD_PATTERN secret is not configured; refusing to release (fail-closed)."
+            exit 1
+          fi
           FAIL=0
           REFS=$(git for-each-ref --format='%(refname)' refs/tags refs/heads refs/remotes)
           REFS="HEAD $REFS"
